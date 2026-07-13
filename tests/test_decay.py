@@ -1,10 +1,10 @@
 import httpx
 
-from smelt.claims import check_contradictions
-from smelt.config import Config, LLMConfig
-from smelt.library import index_claims, index_event, record_feedback, stale_claims
-from smelt.render import render_markdown
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.claims import check_contradictions
+from verivann.config import Config, LLMConfig
+from verivann.library import index_claims, index_event, record_feedback, stale_claims
+from verivann.render import render_markdown
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
 
 
 class _Resp:
@@ -25,7 +25,7 @@ def _note(note_id: str, title: str, staging) -> IntakeEvent:
         extracted=Extracted(title=title, text="body"),
         routing=Routing(domain="research", confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     index_event(event, "n.md", "e.json", staging)
     return event
@@ -86,7 +86,7 @@ def test_self_contradiction_is_named_in_the_note():
         ]}),
         routing=Routing(domain="research", confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     note = render_markdown(event)
     assert "You contradict yourself." in note

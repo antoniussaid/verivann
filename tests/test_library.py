@@ -1,5 +1,5 @@
-from smelt.library import count, index_event, search
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.library import count, index_event, search
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
 
 
 def _ev(id_: str, title: str, text: str, domain: str = "research") -> IntakeEvent:

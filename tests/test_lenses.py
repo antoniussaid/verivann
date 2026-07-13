@@ -1,9 +1,9 @@
 import httpx
 
-from smelt.analysis.analyzer import analyze
-from smelt.analysis.lenses import DEFAULT_LENS, get_lens, lens_names
-from smelt.config import Config, LLMConfig
-from smelt.schema import Extracted
+from verivann.analysis.analyzer import analyze
+from verivann.analysis.lenses import DEFAULT_LENS, get_lens, lens_names
+from verivann.config import Config, LLMConfig
+from verivann.schema import Extracted
 
 
 class _FakeResp:
@@ -46,9 +46,9 @@ def test_lens_is_recorded_even_without_an_llm():
 
 
 def test_lens_headings_rename_the_note_sections():
-    from smelt.analysis.analyzer import Analysis
-    from smelt.render import render_markdown
-    from smelt.schema import Decision, IntakeEvent, Provenance, Routing, Source
+    from verivann.analysis.analyzer import Analysis
+    from verivann.render import render_markdown
+    from verivann.schema import Decision, IntakeEvent, Provenance, Routing, Source
 
     event = IntakeEvent(
         id="x", created_at="2026-01-01T00:00:00Z",
@@ -56,7 +56,7 @@ def test_lens_headings_rename_the_note_sections():
         extracted=Extracted(title="t", text="body"),
         routing=Routing(domain="research", confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     analysis = Analysis("research", 0.5, "r", "note", useful_ideas=["i"], lens="wisdom")
     note = render_markdown(event, analysis)

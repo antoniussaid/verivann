@@ -1,6 +1,6 @@
 import httpx
 
-from smelt.adapters.reddit import extract_reddit
+from verivann.adapters.reddit import extract_reddit
 
 
 class _FakeResp:

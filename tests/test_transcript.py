@@ -1,15 +1,15 @@
 import json
 
-from smelt.adapters.media import (
+from verivann.adapters.media import (
     _json3_to_cues,
     _vtt_to_cues,
     group_cues,
     seek_template,
     timestamp,
 )
-from smelt.analysis.analyzer import Analysis
-from smelt.render import render_markdown
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.analysis.analyzer import Analysis
+from verivann.render import render_markdown
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
 
 
 def test_json3_keeps_the_timeline():
@@ -57,7 +57,7 @@ def test_timestamped_transcript_is_rendered_with_seek_links():
         extracted=Extracted(title="t", text="body", meta=meta),
         routing=Routing(domain="media", confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     note = render_markdown(event, Analysis("media", 0.5, "r", "note"))
 
@@ -73,7 +73,7 @@ def test_untimed_transcript_still_renders_plain():
         extracted=Extracted(title="t", text="body", meta=meta),
         routing=Routing(domain="media", confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     note = render_markdown(event, Analysis("media", 0.5, "r", "note"))
     assert "## Transcript (whisper · de)" in note

@@ -1,11 +1,11 @@
 import httpx
 
-from smelt.bias import bias
-from smelt.config import Config, LLMConfig
-from smelt.library import index_event, mark_source, record_feedback
-from smelt.pipeline import run
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
-from smelt.stats import mirror, slag
+from verivann.bias import bias
+from verivann.config import Config, LLMConfig
+from verivann.library import index_event, mark_source, record_feedback
+from verivann.pipeline import run
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.stats import mirror, slag
 
 
 class _Resp:
@@ -27,7 +27,7 @@ def _indexed(note_id, title, text, staging, source_key="youtube:@guru", minutes=
                                                           "extractor": "Youtube"}),
         routing=Routing(domain="finance", confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     index_event(event, "n.md", "e.json", staging)
     return event
@@ -105,7 +105,7 @@ def test_dissenters_with_the_better_record_are_flagged(monkeypatch, tmp_path):
     record_feedback(dissenter.id, "kept", tmp_path)
 
     # The dissenting note comes from a different channel with a good record.
-    from smelt.library import _connect
+    from verivann.library import _connect
 
     con = _connect(tmp_path)
     con.execute("UPDATE notes SET source_key = 'youtube:@skeptic' WHERE id = 'd1'")

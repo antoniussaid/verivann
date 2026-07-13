@@ -1,4 +1,4 @@
-from smelt.storage.naming import artifact_stem
+from verivann.storage.naming import artifact_stem
 
 
 def test_stem_is_filesystem_safe():

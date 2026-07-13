@@ -1,12 +1,12 @@
-from smelt.accept import accept
-from smelt.calibrate import MIN_JUDGED, calibrate
-from smelt.cockpit import load
-from smelt.config import Config
-from smelt.library import index_event, record_feedback, verdict_of
-from smelt.pipeline import run
-from smelt.relevance import load_profile
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
-from smelt.signals import implied_drops, observe, sweep
+from verivann.accept import accept
+from verivann.calibrate import MIN_JUDGED, calibrate
+from verivann.cockpit import load
+from verivann.config import Config
+from verivann.library import index_event, record_feedback, verdict_of
+from verivann.pipeline import run
+from verivann.relevance import load_profile
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.signals import implied_drops, observe, sweep
 
 
 def _old_note(note_id: str, title: str, staging, days_ago: int, action="note", confidence=0.7,
@@ -20,7 +20,7 @@ def _old_note(note_id: str, title: str, staging, days_ago: int, action="note", c
         extracted=Extracted(title=title, text=f"{title} body text about agents"),
         routing=Routing(domain="research", confidence=confidence, reason="r"),
         decision=Decision(action=action, target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     index_event(event, "n.md", "e.json", staging, engine=engine, lens=lens)
     return event
@@ -164,7 +164,7 @@ def test_the_cockpit_leads_with_the_unread_pile(tmp_path):
 
 
 def test_a_due_prediction_outranks_everything(tmp_path):
-    from smelt.predictions import record
+    from verivann.predictions import record
 
     config = Config(staging_dir=tmp_path)
     run("text", ref="text", text="material", config=config)

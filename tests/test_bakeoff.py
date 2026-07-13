@@ -2,10 +2,10 @@
 
 import httpx
 
-from smelt.bakeoff import MIN_JUDGED, results, run
-from smelt.config import Config, LLMConfig
-from smelt.library import record_feedback
-from smelt.pipeline import run as digest
+from verivann.bakeoff import MIN_JUDGED, results, run
+from verivann.config import Config, LLMConfig
+from verivann.library import record_feedback
+from verivann.pipeline import run as digest
 
 
 class _Resp:
@@ -62,7 +62,7 @@ def test_a_winner_is_not_crowned_on_thin_evidence(monkeypatch, tmp_path):
     config.llm = LLMConfig(provider="groq", model="a", base_url="http://x/v1")
     run(["a", "b"], config)
 
-    from smelt.library import recent
+    from verivann.library import recent
 
     for hit in recent(tmp_path, limit=3):
         record_feedback(hit.id, "kept", tmp_path)
@@ -85,7 +85,7 @@ def test_your_verdicts_decide_the_winner(monkeypatch, tmp_path):
     config.llm = LLMConfig(provider="groq", model="good", base_url="http://x/v1")
     run(["good", "bad"], config, limit=MIN_JUDGED)
 
-    from smelt.library import recent
+    from verivann.library import recent
 
     for hit in recent(tmp_path, limit=MIN_JUDGED):
         record_feedback(hit.id, "kept", tmp_path)  # you kept everything
@@ -110,7 +110,7 @@ def test_a_tie_is_reported_as_a_tie(monkeypatch, tmp_path):
     config.llm = LLMConfig(provider="groq", model="cheap", base_url="http://x/v1")
     run(["cheap", "expensive"], config, limit=MIN_JUDGED)
 
-    from smelt.library import recent
+    from verivann.library import recent
 
     for hit in recent(tmp_path, limit=MIN_JUDGED):
         record_feedback(hit.id, "kept", tmp_path)

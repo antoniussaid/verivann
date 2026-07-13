@@ -2,20 +2,20 @@ from datetime import datetime, timedelta, timezone
 
 import httpx
 
-from smelt.config import Config, LLMConfig
-from smelt.library import (
+from verivann.config import Config, LLMConfig
+from verivann.library import (
     index_claims,
     index_event,
     mark_source,
     record_feedback,
     set_prediction_status,
 )
-from smelt.pipeline import run
-from smelt.predictions import record
-from smelt.questions import add
-from smelt.refresh import refresh
-from smelt.resurface import resurface
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.pipeline import run
+from verivann.predictions import record
+from verivann.questions import add
+from verivann.refresh import refresh
+from verivann.resurface import resurface
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
 
 
 class _Resp:
@@ -45,7 +45,7 @@ def _staged(note_id, title, text, tmp_path, days_ago=0, source_key="web:example.
         extracted=Extracted(title=title, text=text),
         routing=Routing(domain="research", confidence=0.6, reason="r"),
         decision=Decision(action="note", target=str(path)),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
     index_event(event, str(path), "e.json", tmp_path)
     return path
@@ -87,7 +87,7 @@ def test_expired_claims_and_missed_predictions_reach_the_note(tmp_path):
     path = _staged("n1", "A confident piece", "body", tmp_path)
     index_claims("n1", ["The rate is 2%."], tmp_path, shelf_life_days=-1)  # already expired
     record("n1", "web:example.com", [{"text": "Rates will fall", "due": "2026-01-01"}], tmp_path)
-    from smelt.library import prediction_rows
+    from verivann.library import prediction_rows
 
     set_prediction_status(prediction_rows(tmp_path)[0]["id"], "miss", tmp_path)
 
@@ -117,7 +117,7 @@ def test_refreshing_twice_does_not_stack_banners(tmp_path):
     refresh(config)
     text = path.read_text(encoding="utf-8")
     assert text.count("Since you read this") == 1
-    assert text.count("<!-- smelt:since -->") == 1
+    assert text.count("<!-- verivann:since -->") == 1
 
 
 def test_the_frontmatter_survives_the_banner(tmp_path):

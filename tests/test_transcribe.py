@@ -1,10 +1,10 @@
-from smelt.adapters.transcribe import enabled, maybe_transcribe
-from smelt.render.markdown import render_markdown
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.adapters.transcribe import enabled, maybe_transcribe
+from verivann.render.markdown import render_markdown
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
 
 
 def test_transcribe_disabled_by_default(monkeypatch, tmp_path):
-    monkeypatch.delenv("SMELT_WHISPER_MODEL", raising=False)
+    monkeypatch.delenv("VERIVANN_WHISPER_MODEL", raising=False)
     assert enabled() is False
     assert maybe_transcribe("https://example.com/v", tmp_path) == (None, None)
 

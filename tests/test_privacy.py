@@ -1,11 +1,11 @@
 import httpx
 import pytest
 
-from smelt.config import Config, LLMConfig
-from smelt.library import outbound_rows, outbound_total
-from smelt.pipeline import run
-from smelt.privacy import PUBLIC, SENSITIVE, classify, config_for, is_local, policy
-from smelt.render import render_markdown
+from verivann.config import Config, LLMConfig
+from verivann.library import outbound_rows, outbound_total
+from verivann.pipeline import run
+from verivann.privacy import PUBLIC, SENSITIVE, classify, config_for, is_local, policy
+from verivann.render import render_markdown
 
 
 class _Resp:
@@ -18,7 +18,7 @@ class _Resp:
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
-    for key in ("SMELT_PRIVACY", "SMELT_PRICE_PER_MTOK"):
+    for key in ("VERIVANN_PRIVACY", "VERIVANN_PRICE_PER_MTOK"):
         monkeypatch.delenv(key, raising=False)
 
 
@@ -78,7 +78,7 @@ def test_public_material_may_use_the_hosted_slot():
 
 
 def test_allow_policy_is_honoured_but_recorded(monkeypatch):
-    monkeypatch.setenv("SMELT_PRIVACY", "allow")
+    monkeypatch.setenv("VERIVANN_PRIVACY", "allow")
     config = Config(llm=_hosted())
     read_config, stayed_local = config_for(config, SENSITIVE)
 
@@ -87,8 +87,8 @@ def test_allow_policy_is_honoured_but_recorded(monkeypatch):
 
 
 def test_a_screenshot_is_not_uploaded_and_the_note_says_so(monkeypatch, tmp_path):
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: True)
-    monkeypatch.setattr("smelt.adapters.vision.ocr_image", lambda p: "Kontoauszug: IBAN AT61 1904 3002 3457 3201")
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_image", lambda p: "Kontoauszug: IBAN AT61 1904 3002 3457 3201")
 
     def explode(*args, **kwargs):
         raise AssertionError("a hosted model was called with sensitive material")
@@ -126,7 +126,7 @@ def test_every_hosted_call_is_written_to_the_ledger(monkeypatch, tmp_path):
 
 
 def test_cost_is_estimated_only_when_you_gave_us_a_price(monkeypatch, tmp_path):
-    monkeypatch.setenv("SMELT_PRICE_PER_MTOK", "3.0")
+    monkeypatch.setenv("VERIVANN_PRICE_PER_MTOK", "3.0")
     monkeypatch.setattr(httpx, "post", lambda *a, **k: _Resp())
     config = Config(staging_dir=tmp_path, llm=_hosted())
 

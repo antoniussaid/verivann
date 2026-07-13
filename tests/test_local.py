@@ -2,14 +2,14 @@ import zipfile
 
 import httpx
 
-from smelt import feeds, watchfolder
-from smelt.adapters.local import extract_epub, extract_file, extract_image
-from smelt.config import Config
-from smelt.pipeline import run
+from verivann import feeds, watchfolder
+from verivann.adapters.local import extract_epub, extract_file, extract_image
+from verivann.config import Config
+from verivann.pipeline import run
 
 
 def test_an_image_without_ocr_says_so_instead_of_lying(monkeypatch, tmp_path):
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: False)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: False)
     shot = tmp_path / "screenshot.png"
     shot.write_bytes(b"\x89PNG\r\n\x1a\n")
 
@@ -19,9 +19,9 @@ def test_an_image_without_ocr_says_so_instead_of_lying(monkeypatch, tmp_path):
 
 
 def test_a_screenshot_becomes_a_routed_note(monkeypatch, tmp_path):
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
     monkeypatch.setattr(
-        "smelt.adapters.vision.ocr_image",
+        "verivann.adapters.vision.ocr_image",
         lambda path: "Self-hosted agent architecture\nlocal-first automation beats the cloud",
     )
     shot = tmp_path / "shot.png"
@@ -33,7 +33,7 @@ def test_a_screenshot_becomes_a_routed_note(monkeypatch, tmp_path):
 
 
 def test_audio_without_whisper_is_honest(monkeypatch, tmp_path):
-    monkeypatch.delenv("SMELT_WHISPER_MODEL", raising=False)
+    monkeypatch.delenv("VERIVANN_WHISPER_MODEL", raising=False)
     memo = tmp_path / "memo.m4a"
     memo.write_bytes(b"\x00")
 
@@ -43,9 +43,9 @@ def test_audio_without_whisper_is_honest(monkeypatch, tmp_path):
 
 
 def test_a_voice_memo_is_transcribed_and_routed(monkeypatch, tmp_path):
-    monkeypatch.setenv("SMELT_WHISPER_MODEL", "base")
+    monkeypatch.setenv("VERIVANN_WHISPER_MODEL", "base")
     monkeypatch.setattr(
-        "smelt.adapters.transcribe.transcribe_file",
+        "verivann.adapters.transcribe.transcribe_file",
         lambda path: ("Idea: route intake by open questions, not folders.", "en"),
     )
     memo = tmp_path / "memo.m4a"
@@ -67,8 +67,8 @@ def test_an_epub_is_just_a_zip_of_html(tmp_path):
 
 
 def test_a_pdf_without_a_reader_says_what_to_install(monkeypatch, tmp_path):
-    monkeypatch.setattr("smelt.adapters.local._pdf_via_poppler", lambda p: None)
-    monkeypatch.setattr("smelt.adapters.local._pdf_via_pypdf", lambda p: None)
+    monkeypatch.setattr("verivann.adapters.local._pdf_via_poppler", lambda p: None)
+    monkeypatch.setattr("verivann.adapters.local._pdf_via_pypdf", lambda p: None)
     pdf = tmp_path / "paper.pdf"
     pdf.write_bytes(b"%PDF-1.4")
 
@@ -78,8 +78,8 @@ def test_a_pdf_without_a_reader_says_what_to_install(monkeypatch, tmp_path):
 
 
 def test_a_folder_digests_only_what_is_new(monkeypatch, tmp_path):
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: True)
-    monkeypatch.setattr("smelt.adapters.vision.ocr_image", lambda p: f"text of {p.name} about agents")
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_image", lambda p: f"text of {p.name} about agents")
 
     folder = tmp_path / "shots"
     folder.mkdir()
@@ -97,8 +97,8 @@ def test_a_folder_digests_only_what_is_new(monkeypatch, tmp_path):
 
 
 def test_the_folder_is_never_modified(monkeypatch, tmp_path):
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: True)
-    monkeypatch.setattr("smelt.adapters.vision.ocr_image", lambda p: "some text about automation")
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_image", lambda p: "some text about automation")
     folder = tmp_path / "shots"
     folder.mkdir()
     (folder / "a.png").write_bytes(b"\x89PNG")
@@ -132,7 +132,7 @@ def test_rss_is_parsed_without_a_dependency(monkeypatch):
 
 
 def _feed_pages(monkeypatch):
-    from smelt.schema import Extracted
+    from verivann.schema import Extracted
 
     pages = {
         "https://example.com/a": Extracted(
@@ -142,7 +142,7 @@ def _feed_pages(monkeypatch):
         "https://example.com/b": Extracted(title="Celebrity gossip", text="x"),  # too thin -> dropped
     }
     monkeypatch.setattr(httpx, "get", lambda *a, **k: _FeedResp())
-    monkeypatch.setattr("smelt.pipeline.extract_webpage", lambda url: pages[url])
+    monkeypatch.setattr("verivann.pipeline.extract_webpage", lambda url: pages[url])
 
 
 def test_an_untrained_filter_admits_it_instead_of_pretending(monkeypatch, tmp_path):
@@ -160,8 +160,8 @@ def test_an_untrained_filter_admits_it_instead_of_pretending(monkeypatch, tmp_pa
 
 
 def test_a_trained_filter_uses_what_you_keep(monkeypatch, tmp_path):
-    from smelt.library import record_feedback
-    from smelt.pipeline import run as digest
+    from verivann.library import record_feedback
+    from verivann.pipeline import run as digest
 
     config = Config(staging_dir=tmp_path)
     # Teach it: three verdicts, all against crypto-style material.

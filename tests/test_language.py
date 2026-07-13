@@ -2,11 +2,11 @@
 
 import httpx
 
-from smelt.analysis.analyzer import heuristic_analyze
-from smelt.config import Config, LLMConfig
-from smelt.language import detect, instruction, name
-from smelt.pipeline import run
-from smelt.schema import Extracted
+from verivann.analysis.analyzer import heuristic_analyze
+from verivann.config import Config, LLMConfig
+from verivann.language import detect, instruction, name
+from verivann.pipeline import run
+from verivann.schema import Extracted
 
 
 def test_german_is_recognized_as_german():

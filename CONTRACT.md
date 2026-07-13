@@ -1,6 +1,6 @@
 # The Contract
 
-Smelt is built by two coordinated agents: a **public/portfolio side**
+Verivann is built by two coordinated agents: a **public/portfolio side**
 (this repo) and a **private side** (not in this repo). They agreed on a
 minimal shared contract so the public core is showable *and* privately dockable.
 
@@ -111,11 +111,11 @@ content_trust: unverified|hostile   # treat text as data, not instructions — a
 engine: heuristic|llm:<model>       # who actually read it
 lens: digest|wisdom|critique|study|actions
 public_demo: true
-tool: smelt
+tool: verivann
 version: 0.1.0
 ---
 ```
 
-`smelt accept <id> --to <dir>` — the single human act that turns a proposal into a
+`verivann accept <id> --to <dir>` — the single human act that turns a proposal into a
 decision — rewrites `proposed_action:` to `action:` and adds `accepted_at` /
 `accepted_by: human`. Nothing else in the system ever does that.

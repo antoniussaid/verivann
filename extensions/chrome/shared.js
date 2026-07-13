@@ -1,5 +1,5 @@
 // Where the inbox lives, and how we talk to it. Nothing here leaves your machine:
-// the extension only ever calls YOUR Smelt server.
+// the extension only ever calls YOUR Verivann server.
 
 export const DEFAULTS = { endpoint: 'http://127.0.0.1:8130', token: '', lens: 'digest' };
 
@@ -14,7 +14,7 @@ export function kindOf(url) {
 export async function digest({ value, kind, lens }) {
   const { endpoint, token, lens: fallback } = await settings();
   const headers = { 'content-type': 'application/json' };
-  if (token) headers['x-smelt-token'] = token;
+  if (token) headers['x-verivann-token'] = token;
 
   const res = await fetch(`${endpoint.replace(/\/$/, '')}/intake`, {
     method: 'POST',
@@ -22,14 +22,14 @@ export async function digest({ value, kind, lens }) {
     body: JSON.stringify({ kind: kind || kindOf(value), value, lens: lens || fallback }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.error) throw new Error(data.error || `Smelt returned ${res.status}`);
+  if (!res.ok || data.error) throw new Error(data.error || `Verivann returned ${res.status}`);
   return data;
 }
 
 export async function verdict(id, v) {
   const { endpoint, token } = await settings();
   const headers = { 'content-type': 'application/json' };
-  if (token) headers['x-smelt-token'] = token;
+  if (token) headers['x-verivann-token'] = token;
 
   const res = await fetch(`${endpoint.replace(/\/$/, '')}/feedback`, {
     method: 'POST',
@@ -37,6 +37,6 @@ export async function verdict(id, v) {
     body: JSON.stringify({ id, verdict: v }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.error) throw new Error(data.error || `Smelt returned ${res.status}`);
+  if (!res.ok || data.error) throw new Error(data.error || `Verivann returned ${res.status}`);
   return data;
 }

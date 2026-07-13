@@ -1,9 +1,9 @@
-from smelt.analysis.analyzer import Analysis, heuristic_analyze
-from smelt.config import Config
-from smelt.library import index_event, record_feedback
-from smelt.pipeline import run
-from smelt.relevance import MIN_SIGNAL, apply_profile, load_profile
-from smelt.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
+from verivann.analysis.analyzer import Analysis, heuristic_analyze
+from verivann.config import Config
+from verivann.library import index_event, record_feedback
+from verivann.pipeline import run
+from verivann.relevance import MIN_SIGNAL, apply_profile, load_profile
+from verivann.schema import Decision, Extracted, IntakeEvent, Provenance, Routing, Source
 
 
 def _event(note_id: str, title: str, text: str, domain: str = "research") -> IntakeEvent:
@@ -13,7 +13,7 @@ def _event(note_id: str, title: str, text: str, domain: str = "research") -> Int
         extracted=Extracted(title=title, text=text),
         routing=Routing(domain=domain, confidence=0.5, reason="r"),
         decision=Decision(action="note", target="t.md"),
-        provenance=Provenance(tool="smelt", version="0", public_demo=True),
+        provenance=Provenance(tool="verivann", version="0", public_demo=True),
     )
 
 

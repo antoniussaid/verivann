@@ -1,12 +1,12 @@
-// Right-click anything → it lands in Smelt. The badge is the whole feedback loop:
+// Right-click anything → it lands in Verivann. The badge is the whole feedback loop:
 // a domain when it worked, "!" when the inbox is not running.
 
 import { digest, kindOf } from './shared.js';
 
 const MENUS = [
-  { id: 'smelt-page', title: 'Smelt this page', contexts: ['page'] },
-  { id: 'smelt-link', title: 'Smelt this link', contexts: ['link'] },
-  { id: 'smelt-selection', title: 'Smelt selection', contexts: ['selection'] },
+  { id: 'verivann-page', title: 'Verivann this page', contexts: ['page'] },
+  { id: 'verivann-link', title: 'Verivann this link', contexts: ['link'] },
+  { id: 'verivann-selection', title: 'Verivann selection', contexts: ['selection'] },
 ];
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -17,7 +17,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const selection = (info.selectionText || '').trim();
   const url = info.linkUrl || info.pageUrl || tab?.url || '';
 
-  const payload = info.menuItemId === 'smelt-selection' && selection
+  const payload = info.menuItemId === 'verivann-selection' && selection
     ? { value: selection, kind: 'text' }
     : { value: url, kind: kindOf(url) };
 
@@ -27,7 +27,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await flash(note.domain.slice(0, 4), '#3a3a44');
   } catch (err) {
     await flash('!', '#7a3b3b');
-    console.error('[smelt]', err.message);  // read via the service-worker console
+    console.error('[verivann]', err.message);  // read via the service-worker console
   }
 });
 

@@ -1,8 +1,8 @@
 import httpx
 
-from smelt.claims import check_contradictions
-from smelt.config import Config, LLMConfig
-from smelt.library import all_claims, index_claims
+from verivann.claims import check_contradictions
+from verivann.config import Config, LLMConfig
+from verivann.library import all_claims, index_claims
 
 
 class _FakeResp:

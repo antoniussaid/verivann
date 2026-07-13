@@ -48,7 +48,7 @@ $('go').addEventListener('click', async () => {
     $('go').textContent = 'Digest again';
   } catch (err) {
     $('err').style.display = 'block';
-    $('err').textContent = `${err.message} — is \`smelt serve\` running?`;
+    $('err').textContent = `${err.message} — is \`verivann serve\` running?`;
     $('go').textContent = 'Digest';
   } finally {
     $('go').disabled = false;

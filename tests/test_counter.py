@@ -3,14 +3,14 @@ from pathlib import Path
 import httpx
 import pytest
 
-from smelt.adapters import search as search_adapter
-from smelt.alloy import alloy
-from smelt.config import Config, LLMConfig
-from smelt.counter import counter
-from smelt.interview import UNSURE_BELOW, answer, uncertain
-from smelt.library import index_claims, verdict_of
-from smelt.pipeline import run
-from smelt.schema import Extracted
+from verivann.adapters import search as search_adapter
+from verivann.alloy import alloy
+from verivann.config import Config, LLMConfig
+from verivann.counter import counter
+from verivann.interview import UNSURE_BELOW, answer, uncertain
+from verivann.library import index_claims, verdict_of
+from verivann.pipeline import run
+from verivann.schema import Extracted
 
 
 class _Resp:
@@ -26,8 +26,8 @@ class _Resp:
 
 @pytest.fixture(autouse=True)
 def _no_search(monkeypatch):
-    monkeypatch.delenv("SMELT_SEARCH_URL", raising=False)
-    monkeypatch.delenv("SMELT_SEARCH_KEY", raising=False)
+    monkeypatch.delenv("VERIVANN_SEARCH_URL", raising=False)
+    monkeypatch.delenv("VERIVANN_SEARCH_KEY", raising=False)
 
 
 # ---------- counter-search ----------
@@ -42,11 +42,11 @@ def test_without_a_backend_it_returns_honest_emptiness(tmp_path):
 
 
 def test_it_never_asks_the_accused_for_an_alibi(monkeypatch, tmp_path):
-    monkeypatch.setenv("SMELT_SEARCH_URL", "http://localhost:8888")
+    monkeypatch.setenv("VERIVANN_SEARCH_URL", "http://localhost:8888")
     config = Config(staging_dir=tmp_path)
 
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: Extracted(title=f"page {url}", text="a rebuttal about automation", meta={}),
     )
     note = run("url", ref="https://guru.example.com/post", config=config)
@@ -66,11 +66,11 @@ def test_it_never_asks_the_accused_for_an_alibi(monkeypatch, tmp_path):
 
 
 def test_a_fetched_source_that_contradicts_announces_itself(monkeypatch, tmp_path):
-    monkeypatch.setenv("SMELT_SEARCH_URL", "http://localhost:8888")
+    monkeypatch.setenv("VERIVANN_SEARCH_URL", "http://localhost:8888")
     config = Config(staging_dir=tmp_path, llm=LLMConfig(provider="openai", model="m", base_url="http://x/v1"))
 
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: Extracted(title="Original piece", text="whisper needs a gpu", meta={}),
     )
     note = run("url", ref="https://guru.example.com/post", config=config)
@@ -81,7 +81,7 @@ def test_a_fetched_source_that_contradicts_announces_itself(monkeypatch, tmp_pat
         lambda q, limit=5: [search_adapter.Result("CPU is enough", "https://critic.example.org/x", "")],
     )
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: Extracted(title="CPU is enough", text="whisper runs fine on cpu", meta={}),
     )
 
@@ -125,7 +125,7 @@ def test_an_answer_routes_the_note_and_teaches_the_router(tmp_path):
     assert "routed to" in line
     assert verdict_of(note.event.id, tmp_path) == "kept"
 
-    from smelt.library import note_row
+    from verivann.library import note_row
 
     assert note_row(note.event.id, tmp_path)["domain"] == "finance"
     assert note_row(note.event.id, tmp_path)["confidence"] == 1.0  # you are not a guess

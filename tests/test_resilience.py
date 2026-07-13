@@ -1,13 +1,13 @@
 import httpx
 import pytest
 
-from smelt.analysis.llm import AllModelsFailed, call
-from smelt.config import Config, LLMConfig
-from smelt.library import verdict_of
-from smelt.pipeline import run
-from smelt.reanalyze import pending, reanalyze
-from smelt.redact import redact
-from smelt.render import render_markdown
+from verivann.analysis.llm import AllModelsFailed, call
+from verivann.config import Config, LLMConfig
+from verivann.library import verdict_of
+from verivann.pipeline import run
+from verivann.reanalyze import pending, reanalyze
+from verivann.redact import redact
+from verivann.render import render_markdown
 
 
 class _Resp:
@@ -29,9 +29,9 @@ def _rate_limited(retry_after: str = "0"):
 
 @pytest.fixture(autouse=True)
 def _fast(monkeypatch):
-    monkeypatch.setattr("smelt.analysis.llm.time.sleep", lambda s: None)
-    monkeypatch.delenv("SMELT_REDACT", raising=False)
-    monkeypatch.delenv("SMELT_PRIVACY", raising=False)
+    monkeypatch.setattr("verivann.analysis.llm.time.sleep", lambda s: None)
+    monkeypatch.delenv("VERIVANN_REDACT", raising=False)
+    monkeypatch.delenv("VERIVANN_PRIVACY", raising=False)
 
 
 # ---------- retry, backoff, fallback ----------
@@ -139,7 +139,7 @@ def test_redaction_is_honest_about_being_incomplete():
 
 
 def test_a_sensitive_file_is_uploaded_only_after_redaction(monkeypatch, tmp_path):
-    monkeypatch.setenv("SMELT_REDACT", "1")
+    monkeypatch.setenv("VERIVANN_REDACT", "1")
     sent = {}
 
     def capture(url, headers=None, json=None, timeout=None):
@@ -147,9 +147,9 @@ def test_a_sensitive_file_is_uploaded_only_after_redaction(monkeypatch, tmp_path
         return _Resp('{"domain":"finance","action":"note","summary":"[PERSON_1] paid [AMOUNT_1]."}')
 
     monkeypatch.setattr(httpx, "post", capture)
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
     monkeypatch.setattr(
-        "smelt.adapters.vision.ocr_image",
+        "verivann.adapters.vision.ocr_image",
         lambda p: "Kontoauszug: Herr Anton Said, IBAN AT61 1904 3002 3457 3201, €1.234,56",
     )
     shot = tmp_path / "shot.png"
@@ -177,8 +177,8 @@ def test_without_redaction_a_sensitive_file_is_simply_not_uploaded(monkeypatch, 
         raise AssertionError("sensitive material reached a hosted model")
 
     monkeypatch.setattr(httpx, "post", explode)
-    monkeypatch.setattr("smelt.adapters.vision.ocr_available", lambda: True)
-    monkeypatch.setattr("smelt.adapters.vision.ocr_image", lambda p: "IBAN AT61 1904 3002 3457 3201")
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_image", lambda p: "IBAN AT61 1904 3002 3457 3201")
     shot = tmp_path / "shot.png"
     shot.write_bytes(b"\x89PNG")
 
@@ -206,7 +206,7 @@ def test_notes_no_model_ever_read_are_found(tmp_path):
 def test_reanalysis_keeps_the_note_and_its_verdicts(monkeypatch, tmp_path):
     config = Config(staging_dir=tmp_path)
     first = run("text", ref="text", text="a local-first automation pipeline for agents", config=config)
-    from smelt.library import record_feedback
+    from verivann.library import record_feedback
 
     record_feedback(first.event.id, "kept", tmp_path)
 
@@ -228,10 +228,10 @@ def test_reanalysis_keeps_the_note_and_its_verdicts(monkeypatch, tmp_path):
 
 def test_reanalysis_never_touches_the_source(monkeypatch, tmp_path):
     config = Config(staging_dir=tmp_path)
-    from smelt.schema import Extracted
+    from verivann.schema import Extracted
 
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: Extracted(title="Fetched once", text="an automation pipeline", meta={}),
     )
     run("url", ref="https://example.com/a", config=config)
@@ -239,7 +239,7 @@ def test_reanalysis_never_touches_the_source(monkeypatch, tmp_path):
     def never(url):
         raise AssertionError("reanalysis went back to the network")
 
-    monkeypatch.setattr("smelt.pipeline.extract_webpage", never)
+    monkeypatch.setattr("verivann.pipeline.extract_webpage", never)
     monkeypatch.setattr(httpx, "post", lambda *a, **k: _Resp('{"domain":"research","action":"note"}'))
     config.llm = LLMConfig(provider="groq", model="m", base_url="http://x/v1")
 

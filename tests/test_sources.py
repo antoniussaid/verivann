@@ -1,8 +1,8 @@
-from smelt.config import Config
-from smelt.library import mark_source, record_feedback, source_standing
-from smelt.pipeline import run
-from smelt.schema import Extracted
-from smelt.sources import identify, material_minutes, note_yield, standings
+from verivann.config import Config
+from verivann.library import mark_source, record_feedback, source_standing
+from verivann.pipeline import run
+from verivann.schema import Extracted
+from verivann.sources import identify, material_minutes, note_yield, standings
 
 
 def test_a_channel_is_the_source_not_the_platform():
@@ -67,7 +67,7 @@ def test_yield_is_unknown_when_nothing_ever_read_it(tmp_path):
 def test_a_low_yield_source_is_called_out_once_it_was_actually_read(tmp_path, monkeypatch):
     import httpx
 
-    from smelt.config import LLMConfig
+    from verivann.config import LLMConfig
 
     class _Resp:
         def raise_for_status(self):

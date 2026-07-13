@@ -1,10 +1,10 @@
 import httpx
 
-from smelt.config import Config, LLMConfig
-from smelt.pipeline import run
-from smelt.questions import add, answer, close, listing, match
-from smelt.render import render_markdown
-from smelt.schema import Extracted
+from verivann.config import Config, LLMConfig
+from verivann.pipeline import run
+from verivann.questions import add, answer, close, listing, match
+from verivann.render import render_markdown
+from verivann.schema import Extracted
 
 
 class _Resp:

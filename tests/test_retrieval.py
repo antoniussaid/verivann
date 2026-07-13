@@ -1,13 +1,13 @@
 import httpx
 
-from smelt.accept import accept
-from smelt.config import Config, EmbedConfig
-from smelt.digest import anki, digest
-from smelt.embed import cosine, enabled, pack, unpack
-from smelt.library import record_feedback
-from smelt.pipeline import run
-from smelt.retrieval import retrieve
-from smelt.trace import trace
+from verivann.accept import accept
+from verivann.config import Config, EmbedConfig
+from verivann.digest import anki, digest
+from verivann.embed import cosine, enabled, pack, unpack
+from verivann.library import record_feedback
+from verivann.pipeline import run
+from verivann.retrieval import retrieve
+from verivann.trace import trace
 
 
 class _Embed:
@@ -98,7 +98,7 @@ def test_accepting_writes_a_decision_not_a_proposal(tmp_path):
     assert "accepted_by: human" in text
     assert "accepted by you on" in text
 
-    from smelt.library import verdict_of
+    from verivann.library import verdict_of
 
     assert verdict_of(result.event.id, tmp_path) == "kept"  # accepting IS keeping
 

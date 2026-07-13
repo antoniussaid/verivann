@@ -1,8 +1,8 @@
-from smelt.config import Config
-from smelt.library import source_standing
-from smelt.pipeline import run
-from smelt.render import render_markdown
-from smelt.security import scan_injection, scan_interest, trust_level
+from verivann.config import Config
+from verivann.library import source_standing
+from verivann.pipeline import run
+from verivann.render import render_markdown
+from verivann.security import scan_injection, scan_interest, trust_level
 
 
 def test_override_attempt_is_caught():
@@ -74,7 +74,7 @@ def test_an_instruction_spoken_aloud_is_caught_too():
 
 
 def test_who_profits_is_surfaced():
-    findings = scan_interest("This video is sponsored by Acme. Use code SMELT for 20% off — link in bio.")
+    findings = scan_interest("This video is sponsored by Acme. Use code VERIVANN for 20% off — link in bio.")
     kinds = {f.kind for f in findings}
     assert {"sponsorship", "discount code", "funnel"} <= kinds
 
@@ -95,9 +95,9 @@ def test_the_canary_catches_a_SUCCESSFUL_hijack(monkeypatch, tmp_path):
 
     import httpx
 
-    from smelt.config import LLMConfig
-    from smelt.library import source_standing
-    from smelt.pipeline import run
+    from verivann.config import LLMConfig
+    from verivann.library import source_standing
+    from verivann.pipeline import run
 
     captured = {}
 
@@ -136,8 +136,8 @@ def test_the_canary_catches_a_SUCCESSFUL_hijack(monkeypatch, tmp_path):
 def test_a_clean_model_never_leaks_the_canary(monkeypatch, tmp_path):
     import httpx
 
-    from smelt.config import LLMConfig
-    from smelt.pipeline import run
+    from verivann.config import LLMConfig
+    from verivann.pipeline import run
 
     class _Resp:
         def raise_for_status(self):

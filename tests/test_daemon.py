@@ -2,9 +2,9 @@
 
 import httpx
 
-from smelt.config import Config
-from smelt.daemon import due, install_hint, run_once, schedule
-from smelt.library import get_state
+from verivann.config import Config
+from verivann.daemon import due, install_hint, run_once, schedule
+from verivann.library import get_state
 
 
 def test_the_schedule_is_what_it_says_it_is():
@@ -32,7 +32,7 @@ def test_a_broken_job_does_not_stop_the_schedule(monkeypatch, tmp_path):
     def explode(config):
         raise RuntimeError("the feed server is on fire")
 
-    monkeypatch.setattr("smelt.daemon._feeds", explode)
+    monkeypatch.setattr("verivann.daemon._feeds", explode)
     config = Config(staging_dir=tmp_path)
 
     result = run_once(config)
@@ -42,17 +42,17 @@ def test_a_broken_job_does_not_stop_the_schedule(monkeypatch, tmp_path):
 
 
 def test_the_daemon_never_downloads_media_because_nobody_is_there_to_ask(monkeypatch):
-    """SMELT_MEDIA=ask in a background run means NO. Silence is not consent."""
-    monkeypatch.setenv("SMELT_MEDIA", "ask")
-    from smelt.mediapolicy import decide
+    """VERIVANN_MEDIA=ask in a background run means NO. Silence is not consent."""
+    monkeypatch.setenv("VERIVANN_MEDIA", "ask")
+    from verivann.mediapolicy import decide
 
     assert decide(has_captions=False, asked=None).allowed is False
 
 
 def test_the_daemon_proposes_and_never_commits(monkeypatch, tmp_path):
     """Whatever it does, a human still has to accept it. It cannot."""
-    from smelt.library import verdict_of
-    from smelt.pipeline import run
+    from verivann.library import verdict_of
+    from verivann.pipeline import run
 
     monkeypatch.setattr(httpx, "get", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("no net")))
     config = Config(staging_dir=tmp_path)

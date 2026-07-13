@@ -1,9 +1,9 @@
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
-from smelt.config import Config
-from smelt.importer import _CHROME_EPOCH, from_history, from_obsidian, from_urls, ingest
-from smelt.schema import Extracted
+from verivann.config import Config
+from verivann.importer import _CHROME_EPOCH, from_history, from_obsidian, from_urls, ingest
+from verivann.schema import Extracted
 
 
 def test_any_export_format_works_because_we_only_take_the_links(tmp_path):
@@ -68,7 +68,7 @@ def test_a_missing_browser_is_not_a_crash(tmp_path):
 
 def test_importing_twice_digests_nothing_twice(monkeypatch, tmp_path):
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: Extracted(title="A piece", text="a local-first automation pipeline", meta={}),
     )
     export = tmp_path / "list.txt"
@@ -88,7 +88,7 @@ def test_a_broken_link_does_not_stop_the_migration(monkeypatch, tmp_path):
             raise RuntimeError("boom")
         return Extracted(title="Fine", text="an automation pipeline for agents", meta={})
 
-    monkeypatch.setattr("smelt.pipeline.extract_webpage", flaky)
+    monkeypatch.setattr("verivann.pipeline.extract_webpage", flaky)
     export = tmp_path / "list.txt"
     export.write_text("https://example.com/bad\nhttps://example.com/good\n", encoding="utf-8")
 
@@ -99,7 +99,7 @@ def test_a_broken_link_does_not_stop_the_migration(monkeypatch, tmp_path):
 
 def test_the_limit_is_a_hard_bound(monkeypatch, tmp_path):
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: Extracted(title=url, text="an automation pipeline", meta={}),
     )
     export = tmp_path / "list.txt"

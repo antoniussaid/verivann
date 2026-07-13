@@ -18,7 +18,7 @@ import subprocess
 
 import pytest
 
-from smelt.web import PAGE, SERVICE_WORKER
+from verivann.web import PAGE, SERVICE_WORKER
 
 _SCRIPT = re.search(r"<script>(.*?)</script>", PAGE, re.DOTALL).group(1)
 

@@ -1,7 +1,7 @@
-from smelt.canonical import canonical_url, clean_input
-from smelt.config import Config
-from smelt.library import find_by_ref
-from smelt.pipeline import run
+from verivann.canonical import canonical_url, clean_input
+from verivann.config import Config
+from verivann.library import find_by_ref
+from verivann.pipeline import run
 
 
 def test_copy_paste_debris_is_stripped():
@@ -35,10 +35,10 @@ def test_non_urls_are_left_alone():
 
 
 def test_the_same_source_twice_is_one_note(tmp_path, monkeypatch):
-    from smelt.adapters import webpage
+    from verivann.adapters import webpage
 
     monkeypatch.setattr(
-        "smelt.pipeline.extract_webpage",
+        "verivann.pipeline.extract_webpage",
         lambda url: webpage.Extracted(title="Fixed", text="an automation pipeline for agents", meta={}),
     )
     config = Config(staging_dir=tmp_path)

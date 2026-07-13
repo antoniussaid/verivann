@@ -1,8 +1,8 @@
 import json
 
-from smelt.config import Config
-from smelt.pipeline import run
-from smelt.schema import IntakeEvent
+from verivann.config import Config
+from verivann.pipeline import run
+from verivann.schema import IntakeEvent
 
 
 def test_textdump_creates_md_and_json(tmp_path):

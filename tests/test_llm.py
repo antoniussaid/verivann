@@ -1,8 +1,8 @@
 import httpx
 
-from smelt.analysis.analyzer import analyze
-from smelt.config import Config, LLMConfig
-from smelt.schema import Extracted
+from verivann.analysis.analyzer import analyze
+from verivann.config import Config, LLMConfig
+from verivann.schema import Extracted
 
 
 class _FakeResp:

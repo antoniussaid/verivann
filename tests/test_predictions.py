@@ -1,10 +1,10 @@
 import httpx
 
-from smelt.config import Config, LLMConfig
-from smelt.library import source_standing
-from smelt.pipeline import run
-from smelt.predictions import listing, record, resolve
-from smelt.render import render_markdown
+from verivann.config import Config, LLMConfig
+from verivann.library import source_standing
+from verivann.pipeline import run
+from verivann.predictions import listing, record, resolve
+from verivann.render import render_markdown
 
 
 class _Resp:
@@ -31,8 +31,8 @@ def test_the_llm_prompt_asks_for_dated_predictions(monkeypatch):
         return _Resp('{"domain":"finance","action":"note"}')
 
     monkeypatch.setattr(httpx, "post", fake_post)
-    from smelt.analysis.analyzer import analyze
-    from smelt.schema import Extracted
+    from verivann.analysis.analyzer import analyze
+    from verivann.schema import Extracted
 
     cfg = Config(llm=LLMConfig(provider="openai", model="m", base_url="http://x/v1"))
     analyze(Extracted(title="t", text="x"), cfg)
@@ -41,8 +41,8 @@ def test_the_llm_prompt_asks_for_dated_predictions(monkeypatch):
 
 
 def test_only_judgeable_predictions_survive_parsing(monkeypatch):
-    from smelt.analysis.analyzer import analyze
-    from smelt.schema import Extracted
+    from verivann.analysis.analyzer import analyze
+    from verivann.schema import Extracted
 
     cfg = _llm(
         monkeypatch,

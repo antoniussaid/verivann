@@ -10,7 +10,7 @@ proposed_action: note
 content_trust: unverified
 engine: heuristic
 public_demo: true
-tool: smelt
+tool: verivann
 version: 0.1.0
 ---
 

@@ -1,5 +1,5 @@
-from smelt.analysis.analyzer import analyze
-from smelt.schema import Extracted
+from verivann.analysis.analyzer import analyze
+from verivann.schema import Extracted
 
 
 def test_research_routing():
