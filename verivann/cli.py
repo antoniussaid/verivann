@@ -588,21 +588,81 @@ def digest_cmd(
 
 @app.command("export")
 def export_cmd(
-    target: str = typer.Argument("anki", help="What to export: anki"),
-    out: Path = typer.Option(Path("verivann-cards.txt"), "--out", help="Output file."),
+    target: str = typer.Argument("notes", help="What to export: notes | anki"),
+    out: Path = typer.Option(None, "--out", help="Output folder (notes) or file (anki)."),
 ) -> None:
-    """Export cards — only from notes you kept."""
-    from .digest import anki
+    """Export your data — the readable notes, or Anki cards from what you kept."""
+    config = Config.load()
+    if target == "notes":
+        from .vault import export_notes
 
-    if target != "anki":
-        typer.echo("  only 'anki' is supported so far.")
+        dest = out or Path("verivann-notes")
+        n = export_notes(config.staging_dir, dest)
+        typer.echo(f"  {n} note(s) → {dest}{os.sep}")
+        if not n:
+            typer.echo("  (nothing digested yet — run `verivann ingest-url/-text …` first)")
+        return
+    if target == "anki":
+        from .digest import anki
+
+        dest = out or Path("verivann-cards.txt")
+        text = anki(config)
+        dest.write_text(text, encoding="utf-8")
+        cards = max(0, len(text.strip().splitlines()) - 3)
+        typer.echo(f"  {cards} card(s) → {dest}")
+        if not cards:
+            typer.echo("  (nothing kept yet, or no LLM has extracted ideas — cards come from kept notes)")
+        return
+    typer.echo("  Unknown target — use 'notes' or 'anki'.")
+    raise typer.Exit(1)
+
+
+@app.command("backup")
+def backup_cmd(
+    out: Path = typer.Option(None, "--out", help="Where to write the .zip."),
+) -> None:
+    """Bundle your whole library into one portable .zip you can move or keep."""
+    from .vault import backup
+
+    dest = out or Path("verivann-backup.zip")
+    path = backup(Config.load().staging_dir, dest)
+    typer.echo(f"  Backed up → {path}  ({path.stat().st_size // 1024} KB)")
+    typer.echo("  One file, everything in it: notes, events, the library, raw archives.")
+
+
+@app.command("purge")
+def purge_cmd(
+    source: str = typer.Option("", "--source", help="Erase one source (its key from `verivann sources`)."),
+    everything: bool = typer.Option(False, "--all", help="Erase the ENTIRE library."),
+    yes: bool = typer.Option(False, "--yes", help="Skip the confirmation prompt."),
+    do_backup: bool = typer.Option(True, "--backup/--no-backup", help="Write a safety .zip first."),
+) -> None:
+    """Erase your data — one source, or everything. Irreversible; backs up first by default."""
+    config = Config.load()
+    if bool(source) == everything:  # neither, or both
+        typer.echo("  Choose exactly one: --source <key> OR --all.")
         raise typer.Exit(1)
-    text = anki(Config.load())
-    out.write_text(text, encoding="utf-8")
-    cards = max(0, len(text.strip().splitlines()) - 3)
-    typer.echo(f"  {cards} card(s) → {out}")
-    if not cards:
-        typer.echo("  (nothing kept yet, or no LLM has extracted ideas — cards come from kept notes)")
+
+    what = "your ENTIRE library" if everything else f"source '{source}'"
+    if not yes and not typer.confirm(f"  Permanently erase {what}? This cannot be undone."):
+        typer.echo("  Cancelled — nothing was touched.")
+        return
+
+    if do_backup:
+        from .vault import backup
+
+        path = backup(config.staging_dir, Path("verivann-backup-before-purge.zip"))
+        typer.echo(f"  Safety backup → {path}")
+
+    if everything:
+        from .vault import erase
+
+        result = erase(config.staging_dir)
+    else:
+        from .library import purge_source
+
+        result = purge_source(source, config.staging_dir)
+    typer.echo(f"  Erased {what}: {result['notes']} note(s), {result['files']} file(s) removed.")
 
 
 @app.command("claims")

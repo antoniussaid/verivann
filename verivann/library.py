@@ -1558,3 +1558,88 @@ def count(staging_dir: Path) -> int:
         return con.execute("SELECT COUNT(*) FROM notes").fetchone()[0]
     finally:
         con.close()
+
+
+# ---------- erasure: your data, gone when you say so ----------
+
+# Every table that holds rows OWNED by a note, so a purge leaves nothing dangling.
+# (feedback/vectors/highlights etc. keyed by note_id; contradictions keyed on both
+# ends; the two FTS shadows are synced by hand, so they are cleared by hand too.)
+_NOTE_OWNED_TABLES = (
+    ("claims", "note_id"),
+    ("feedback", "note_id"),
+    ("predictions", "note_id"),
+    ("vectors", "note_id"),
+    ("signals", "note_id"),
+    ("highlights", "note_id"),
+    ("bakeoff", "note_id"),
+    ("evidence", "note_id"),
+    ("outbound", "note_id"),
+    ("files", "note_id"),
+)
+
+
+def checkpoint(staging_dir: Path) -> None:
+    """Fold the WAL back into library.db, so a plain file-copy of it is complete."""
+    if not _db_path(staging_dir).exists():
+        return
+    con = _connect(staging_dir)
+    try:
+        con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    finally:
+        con.close()
+
+
+def purge_source(source_key: str, staging_dir: Path) -> dict:
+    """Erase one source completely: its notes, their files on disk, and every row that
+    referenced them — claims, feedback, predictions, contradictions, the lot."""
+    if not _db_path(staging_dir).exists():
+        return {"source": source_key, "notes": 0, "files": 0}
+    con = _connect(staging_dir)
+    try:
+        rows = con.execute(
+            "SELECT id, note_path, event_path FROM notes WHERE source_key = ?", (source_key,)
+        ).fetchall()
+        ids = [r["id"] for r in rows]
+        files = _remove_note_files(rows, staging_dir)
+        _delete_note_rows(con, ids)
+        con.execute("DELETE FROM notes WHERE source_key = ?", (source_key,))
+        con.execute("DELETE FROM predictions WHERE source_key = ?", (source_key,))
+        con.execute("DELETE FROM sources WHERE key = ?", (source_key,))
+        con.commit()
+        return {"source": source_key, "notes": len(ids), "files": files}
+    finally:
+        con.close()
+
+
+def _delete_note_rows(con: sqlite3.Connection, ids: list[str]) -> None:
+    if not ids:
+        return
+    marks = ",".join("?" for _ in ids)
+    for table, col in _NOTE_OWNED_TABLES:
+        con.execute(f"DELETE FROM {table} WHERE {col} IN ({marks})", ids)
+    con.execute(
+        f"DELETE FROM contradictions WHERE new_note IN ({marks}) OR old_note IN ({marks})",
+        ids + ids,
+    )
+    if _fts_available(con):
+        con.execute(f"DELETE FROM notes_fts WHERE id IN ({marks})", ids)
+        con.execute(f"DELETE FROM claims_fts WHERE note_id IN ({marks})", ids)
+
+
+def _remove_note_files(rows, staging_dir: Path) -> int:
+    """Delete each note's Markdown, its event JSON, and any raw archives of it."""
+    removed = 0
+    raw_dir = staging_dir / "raw"
+    for row in rows:
+        for key in ("note_path", "event_path"):
+            value = row[key]
+            if value and Path(value).is_file():
+                Path(value).unlink()
+                removed += 1
+        stem = Path(row["note_path"]).stem if row["note_path"] else ""
+        if stem and raw_dir.is_dir():
+            for archive in raw_dir.glob(f"{stem}.*"):
+                archive.unlink()
+                removed += 1
+    return removed
