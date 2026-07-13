@@ -119,6 +119,8 @@ _RSS = """<?xml version="1.0"?>
 
 class _FeedResp:
     content = _RSS.encode()
+    is_redirect = False       # safe_get inspects this to follow redirects
+    headers: dict = {}
 
     def raise_for_status(self):
         return None

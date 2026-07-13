@@ -32,12 +32,14 @@ _MAX_LINKS = 6000
 
 def extract_webpage(url: str) -> Extracted:
     try:
-        import httpx  # imported lazily so the core runs without it installed
+        import httpx  # noqa: F401 - probe: the core runs without it installed
     except ImportError:
         return _fallback(url, "httpx not installed")
 
+    from ..net import safe_get  # validates the target + every redirect hop (SSRF guard)
+
     try:
-        resp = httpx.get(url, headers={"user-agent": _UA}, follow_redirects=True, timeout=20.0)
+        resp = safe_get(url, headers={"user-agent": _UA}, timeout=20.0)
         resp.raise_for_status()
         html = resp.text
     except Exception as exc:  # noqa: BLE001 - network errors are expected, fail soft

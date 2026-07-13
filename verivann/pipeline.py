@@ -107,6 +107,21 @@ def run(
     if kind in ("url", "youtube"):
         ref = canonical_url(ref)
 
+    # SSRF guard at the single chokepoint: refuse a URL that points inward BEFORE any
+    # adapter (webpage, yt-dlp, gallery-dl) is handed it. webpage also guards its own
+    # redirects; this covers the subprocess adapters that do not.
+    if kind in ("url", "youtube"):
+        from .net import check_url
+
+        blocked = check_url(ref)
+        if blocked:
+            extracted = Extracted(
+                title=ref,
+                text=f"[Refused to fetch — {blocked}. This looks like an internal address.]",
+                meta={"url": ref, "blocked": blocked, "fallback": True},
+            )
+            return judge(kind, ref, extracted, config, lens, note_id=None)
+
     extracted = _extract(kind, ref, text, subs_dir=config.staging_dir / ".subs")
     if extra_meta:
         extracted.meta.update(extra_meta)

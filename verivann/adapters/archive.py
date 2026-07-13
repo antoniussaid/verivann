@@ -87,6 +87,10 @@ def archive_all(url: str, dest_dir: Path, stem: str) -> dict[str, str]:
     """Every requested format that a tool is actually available for: {format: path}."""
     if not enabled():
         return {}
+    from ..net import check_url  # never let the archiver reach an internal address
+
+    if check_url(url):
+        return {}
     wanted = formats()
     made: dict[str, str] = {}
 

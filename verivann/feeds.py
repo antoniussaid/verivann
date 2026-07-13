@@ -21,8 +21,6 @@ import re
 from dataclasses import dataclass
 from xml.etree import ElementTree
 
-import httpx
-
 from .config import Config
 
 _UA = "Mozilla/5.0 (compatible; verivann/0.1; +https://antonius.app)"
@@ -64,7 +62,9 @@ class Result:
 
 def fetch(url: str) -> tuple[str, list[Item]]:
     """(feed title, items). RSS or Atom — both are just XML with different names."""
-    resp = httpx.get(url, headers={"user-agent": _UA}, follow_redirects=True, timeout=25.0)
+    from .net import safe_get  # SSRF guard: a feed URL is user-supplied too
+
+    resp = safe_get(url, headers={"user-agent": _UA}, timeout=25.0)
     resp.raise_for_status()
     root = ElementTree.fromstring(resp.content)
 
