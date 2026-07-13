@@ -22,7 +22,7 @@
     "target": "data\\staging\\notes\\2026-07-11-text-a-local-first-personal-knowledge-system-18805170.md"
   },
   "provenance": {
-    "tool": "smelt",
+    "tool": "verivann",
     "version": "0.1.0",
     "public_demo": true,
     "content_trust": "unverified"

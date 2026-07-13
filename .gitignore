@@ -24,3 +24,12 @@ private-config.json
 Thumbs.db
 .idea/
 .vscode/
+
+# Internal working/portfolio docs — kept locally, not published
+ANALYSIS_FRAMEWORK.md
+PLAN.md
+PLAN2.md
+RELEASE.md
+PRIOR_ART.md
+Start Verivann.bat
+docs/portfolio-case-study.md

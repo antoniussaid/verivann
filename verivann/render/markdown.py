@@ -222,7 +222,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         for p in predictions:
             sections.append(f"- **{p.get('due', '?')}** — {p.get('text', '?')}")
         sections.append("")
-        sections.append("_Smelt will ask you on the date. `verivann resolve <id> --hit|--miss`_")
+        sections.append("_Verivann will ask you on the date. `verivann resolve <id> --hit|--miss`_")
 
     # Contradictions — new claims that clash with what is already on record.
     conflicts = meta.get("contradictions")
