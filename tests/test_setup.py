@@ -1,6 +1,16 @@
 """The setup wizard's I/O-free core — the part that must never mangle a config."""
 
-from verivann.setup import PRESETS, compose_env, preset, write_env
+import httpx
+
+from verivann.config import LLMConfig
+from verivann.setup import (
+    PRESETS,
+    compose_env,
+    preset,
+    verify_connection,
+    welcome_text,
+    write_env,
+)
 
 
 def test_every_preset_is_coherent():
@@ -77,3 +87,62 @@ def test_merging_preserves_the_users_other_lines(tmp_path):
 
 def test_an_unknown_provider_writes_nothing():
     assert compose_env("nonesuch") == {}
+
+
+# --- Connection verification: turn a silent misconfiguration into an answer. -------
+
+class _Resp:
+    def __init__(self, content):
+        self._c = content
+
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        return {"choices": [{"message": {"content": self._c}}]}
+
+
+def _llm():
+    return LLMConfig(provider="openai", model="m", base_url="http://x/v1", api_key="k")
+
+
+def test_verify_reports_a_reachable_model(monkeypatch):
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: _Resp("OK"))
+    probe = verify_connection(_llm())
+    assert probe.ok and probe.model == "m" and "OK" in probe.detail
+
+
+def test_verify_reports_an_unconfigured_model():
+    probe = verify_connection(LLMConfig())  # no provider
+    assert not probe.ok and "no model configured" in probe.detail
+
+
+def test_verify_translates_a_rejected_key(monkeypatch):
+    def unauthorized(*a, **k):
+        req = httpx.Request("POST", "http://x/v1")
+        raise httpx.HTTPStatusError("401", request=req, response=httpx.Response(401, request=req))
+
+    monkeypatch.setattr(httpx, "post", unauthorized)
+    probe = verify_connection(_llm())
+    assert not probe.ok and "key was rejected" in probe.detail
+
+
+def test_verify_translates_an_unreachable_server(monkeypatch):
+    def refused(*a, **k):
+        raise httpx.ConnectError("connection refused")
+
+    monkeypatch.setattr(httpx, "post", refused)
+    probe = verify_connection(_llm())
+    assert not probe.ok and "could not reach" in probe.detail
+
+
+def test_verify_never_raises_on_an_odd_failure(monkeypatch):
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("weird")))
+    probe = verify_connection(_llm())
+    assert not probe.ok and probe.detail  # a reason, not a traceback
+
+
+def test_welcome_text_is_real_material_for_a_first_note():
+    title, text = welcome_text()
+    assert "Verivann" in title
+    assert len(text) > 200 and "proposal" in text  # substantial enough to actually analyze

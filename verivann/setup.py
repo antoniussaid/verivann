@@ -105,6 +105,72 @@ def compose_env(
     return env
 
 
+@dataclass(frozen=True)
+class Probe:
+    ok: bool
+    model: str
+    detail: str  # the model's reply on success, a human reason on failure
+
+
+def verify_connection(llm) -> Probe:
+    """One tiny model call, to prove the config actually reaches a model.
+
+    A trusted, fixed prompt with no untrusted material (so the canary is off). Every
+    failure — wrong key, wrong model name, server down, rate limit — comes back as
+    `ok=False` with a short human reason. It never raises: the whole point is to turn
+    a silent misconfiguration into an answer the newcomer can act on immediately.
+    """
+    from .analysis.llm import call
+
+    if not llm.enabled:
+        return Probe(False, llm.model or "", "no model configured")
+    try:
+        reply, model = call(
+            llm,
+            "You are a connection test. Reply with the single word: OK.",
+            "ping",
+            guard=False,
+        )
+    except Exception as exc:  # noqa: BLE001 - report, never crash the wizard
+        return Probe(False, llm.model or "", _friendly_error(exc))
+    return Probe(True, model, reply.strip()[:60] or "(connected; empty reply)")
+
+
+def _friendly_error(exc: Exception) -> str:
+    """Map whatever went wrong to one plain sentence. call() wraps the typed httpx
+    error inside AllModelsFailed, so we read the message text rather than the type."""
+    msg = str(exc)
+    low = msg.lower()
+    if any(s in msg for s in ("401", "403")) or "unauthor" in low or "forbidden" in low:
+        return "the API key was rejected — check the key and try again"
+    if "404" in msg or "not found" in low or "not_found" in low:
+        return "that model or endpoint was not found — check the model name"
+    if "429" in msg or "rate" in low or "quota" in low:
+        return "rate-limited right now — the connection works, try again shortly"
+    if any(s in low for s in ("connect", "refused", "resolve", "timed out", "timeout", "unreachable")):
+        return "could not reach the server — check the URL, or that it is running"
+    if "no model configured" in low:
+        return "no model configured"
+    return (msg[:140] or exc.__class__.__name__)
+
+
+def welcome_text() -> tuple[str, str]:
+    """A real, short piece for the newcomer's first note — so the inbox is never empty
+    and the whole pipeline (extract → analyze → note) proves itself end to end."""
+    title = "Welcome to Verivann"
+    text = (
+        "Verivann turns anything you read, watch, or listen to into a short, honest note "
+        "you actually own. It never posts, never phones home with your data, and never "
+        "commits a note to your knowledge base on its own — every note is a proposal until "
+        "you accept it. It also does what a bookmark never could: it flags who profits from "
+        "a source, catches instructions hidden inside the material that try to hijack the "
+        "analysis, and keeps a running record of what each source has later turned out to be "
+        "right or wrong about. This note was made by that same pipeline, just now, from this "
+        "very paragraph — proof that your model connection works."
+    )
+    return title, text
+
+
 def write_env(path: Path, values: dict[str, str]) -> Path:
     """Merge `values` into a `.env`, preserving any lines the user already had.
 

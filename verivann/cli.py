@@ -118,7 +118,32 @@ def setup_cmd() -> None:
     if preset(p.key) and not preset(p.key).default_embed:
         typer.echo("\n  (This provider has no embeddings endpoint, so meaning-search stays off.")
         typer.echo("   Add a local one any time: VERIVANN_EMBED_MODEL=nomic-embed-text via Ollama.)")
-    typer.echo("\n  Done. Check it with `verivann doctor`.\n")
+
+    # Make the new settings live in THIS process so the probe and the first note use
+    # them without a reload, then prove the connection instead of just hoping.
+    for key, val in values.items():
+        os.environ[key] = val
+
+    from .setup import verify_connection, welcome_text
+
+    typer.echo("\n  Testing the connection…")
+    probe = verify_connection(Config.load().llm)
+    if not probe.ok:
+        typer.echo(f"  ⚠ Could not reach the model: {probe.detail}")
+        typer.echo("    Your .env is saved — fix the setting above and re-run `verivann doctor`.\n")
+        _maybe_serve()
+        return
+
+    typer.echo(f"  ✓ Connected — {probe.model} answered.")
+    # Cold-start reward: a real first note, so the inbox opens with something in it.
+    typer.echo("  Making your first note so the inbox isn't empty…")
+    try:
+        _, text = welcome_text()
+        first = run("text", ref="text", text=text)
+        typer.echo(f"  ✓ First note ready: {first.event.extracted.title[:60]}")
+    except Exception as exc:  # noqa: BLE001 - the connection is proven; a note hiccup is minor
+        typer.echo(f"  (Skipped the sample note: {str(exc)[:80]})")
+    typer.echo("\n  Done. Check it any time with `verivann doctor`.\n")
     _maybe_serve()
 
 
