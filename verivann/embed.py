@@ -128,3 +128,60 @@ def reindex(config: Config) -> int:
             store_vector(note_id, pack(vector), config.staging_dir)
             done += 1
     return done
+
+
+@dataclass
+class SemDupe:
+    keeper_id: str
+    keeper_title: str
+    dupe_id: str
+    dupe_title: str
+    score: float
+    same_source: bool  # True = literally one source under two URLs (safe to merge)
+
+
+def semantic_dupes(config: Config, threshold: float = 0.94) -> list[SemDupe]:
+    """Near-identical notes that URL-dedup can't catch — the same content re-posted.
+
+    This is the one guard that protects the whole credibility metric: without it, a
+    piece syndicated across sites inflates a source's apparent corroboration. Pairs
+    already unified by canon are skipped (URL-dedup owns them); the older note is the
+    keeper. `same_source` marks the safe case — one source under two URLs, fine to
+    merge automatically — versus a cross-source match, which is real corroboration to
+    surface rather than silently collapse.
+
+    Brute-force pairwise cosine. A personal library is small; this is fine (the same
+    honest caveat `semantic_hits` carries).
+    """
+    if not enabled(config):
+        return []
+    from .library import vectors_with_meta
+
+    rows = vectors_with_meta(config.staging_dir)
+    if len(rows) < 2:
+        return []
+    packed = [(r, unpack(r["vec"])) for r in rows]
+
+    out: list[SemDupe] = []
+    for i in range(len(packed)):
+        row_a, vec_a = packed[i]
+        for j in range(i + 1, len(packed)):
+            row_b, vec_b = packed[j]
+            if row_a["canon"] and row_a["canon"] == row_b["canon"]:
+                continue  # URL dedup already owns this pair
+            score = cosine(vec_a, vec_b)
+            if score < threshold:
+                continue
+            older, newer = sorted((row_a, row_b), key=lambda r: r["created_at"] or "")
+            out.append(
+                SemDupe(
+                    keeper_id=older["id"],
+                    keeper_title=older["title"],
+                    dupe_id=newer["id"],
+                    dupe_title=newer["title"],
+                    score=round(score, 3),
+                    same_source=bool(older["source_key"]) and older["source_key"] == newer["source_key"],
+                )
+            )
+    out.sort(key=lambda d: d.score, reverse=True)
+    return out

@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import os
-import shutil
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import typer
@@ -846,17 +845,56 @@ def sources_cmd(limit: int = typer.Option(20, help="Max sources to show.")) -> N
 
 
 @app.command("dedupe")
-def dedupe_cmd() -> None:
+def dedupe_cmd(
+    semantic: bool = typer.Option(
+        False, "--semantic", help="Also catch near-identical reposts by meaning (needs an embedder)."
+    ),
+) -> None:
     """Collapse notes that are the same source under different URLs (?t=…, ?si=…, youtu.be)."""
     from .library import dedupe
 
-    merged = dedupe(Config.load().staging_dir)
-    if not merged:
-        typer.echo("  nothing to merge — every source is already unique.")
-        return
+    config = Config.load()
+    merged = dedupe(config.staging_dir)
     for title, count in merged:
         typer.echo(f"  merged {count} duplicate(s) into: {title[:60]}")
+    if not merged:
+        typer.echo("  nothing to merge by URL — every source is already unique.")
+
+    if semantic:
+        _dedupe_semantic(config)
     typer.echo("\n  (note files on disk were not touched — only the library index)")
+
+
+def _dedupe_semantic(config: Config) -> None:
+    """Merge same-source reposts automatically; surface cross-source echoes, never
+    collapse them — two sources saying the same thing is corroboration, not a dupe."""
+    from .embed import enabled as embed_on
+    from .embed import semantic_dupes
+
+    if not embed_on(config):
+        typer.echo("\n  --semantic needs an embedder (set VERIVANN_EMBED_MODEL). Skipped.")
+        return
+    dupes = semantic_dupes(config)
+    if not dupes:
+        typer.echo("\n  no near-identical reposts found.")
+        return
+
+    from .library import merge_notes
+
+    already: set[str] = set()
+    for d in (d for d in dupes if d.same_source):
+        if d.dupe_id in already or d.keeper_id in already:
+            continue
+        merge_notes(d.keeper_id, d.dupe_id, config.staging_dir)
+        already.add(d.dupe_id)
+        typer.echo(f"  merged repost ({d.score}): {d.dupe_title[:46]} -> {d.keeper_title[:46]}")
+
+    echoes = [d for d in dupes if not d.same_source]
+    if echoes:
+        typer.echo("\n  Same content from a DIFFERENT source — left intact (that is corroboration,")
+        typer.echo("  not a duplicate) but flagged so you know it is not independent:")
+        for d in echoes[:10]:
+            typer.echo(f"    {d.score}  {d.keeper_title[:38]}  ~  {d.dupe_title[:38]}")
 
 
 @app.command("keep")
@@ -1363,7 +1401,9 @@ def doctor() -> None:
     cfg = Config.load()
     typer.echo(f"verivann {__version__}")
     typer.echo(f"  python         : {sys.version.split()[0]}")
-    typer.echo(f"  yt-dlp         : {'yes' if shutil.which('yt-dlp') else 'no (youtube falls back)'}")
+    from .tools import ytdlp_health
+
+    typer.echo(f"  yt-dlp         : {ytdlp_health(datetime.now(timezone.utc).date())}")
     typer.echo(f"  staging dir    : {cfg.staging_dir}")
     typer.echo(f"  domains        : {', '.join(cfg.domains)}")
     typer.echo(f"  public_demo    : {cfg.public_demo}")

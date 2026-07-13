@@ -410,15 +410,47 @@ def dedupe(staging_dir: Path) -> list[tuple[str, int]]:
             ).fetchall()
             keeper, dupes = rows[0], rows[1:]
             for dupe in dupes:
-                con.execute("UPDATE OR IGNORE claims SET note_id = ? WHERE note_id = ?", (keeper["id"], dupe["id"]))
-                con.execute("UPDATE OR IGNORE feedback SET note_id = ? WHERE note_id = ?", (keeper["id"], dupe["id"]))
-                con.execute("DELETE FROM notes WHERE id = ?", (dupe["id"],))
-                if _fts_available(con):
-                    con.execute("DELETE FROM notes_fts WHERE id = ?", (dupe["id"],))
-                    con.execute("UPDATE claims_fts SET note_id = ? WHERE note_id = ?", (keeper["id"], dupe["id"]))
+                _merge_into(con, keeper["id"], dupe["id"])
             merged.append((keeper["title"], len(dupes)))
         con.commit()
         return merged
+    finally:
+        con.close()
+
+
+def _merge_into(con: sqlite3.Connection, keeper_id: str, dupe_id: str) -> None:
+    """Re-point a duplicate's claims and verdicts onto the keeper, then drop the
+    duplicate (its note row, FTS shadow, and now-orphaned vector)."""
+    con.execute("UPDATE OR IGNORE claims SET note_id = ? WHERE note_id = ?", (keeper_id, dupe_id))
+    con.execute("UPDATE OR IGNORE feedback SET note_id = ? WHERE note_id = ?", (keeper_id, dupe_id))
+    con.execute("DELETE FROM notes WHERE id = ?", (dupe_id,))
+    con.execute("DELETE FROM vectors WHERE note_id = ?", (dupe_id,))
+    if _fts_available(con):
+        con.execute("DELETE FROM notes_fts WHERE id = ?", (dupe_id,))
+        con.execute("UPDATE claims_fts SET note_id = ? WHERE note_id = ?", (keeper_id, dupe_id))
+
+
+def merge_notes(keeper_id: str, dupe_id: str, staging_dir: Path) -> None:
+    """Public single-pair merge — used by semantic dedup, which pairs by meaning."""
+    con = _connect(staging_dir)
+    try:
+        _merge_into(con, keeper_id, dupe_id)
+        con.commit()
+    finally:
+        con.close()
+
+
+def vectors_with_meta(staging_dir: Path) -> list[dict]:
+    """Every embedded note with the fields semantic dedup needs to pair and rank."""
+    con = _connect(staging_dir)
+    try:
+        rows = con.execute(
+            """SELECT n.id AS id, n.title AS title, COALESCE(n.canon, '') AS canon,
+                      COALESCE(n.source_key, '') AS source_key, n.created_at AS created_at,
+                      v.vec AS vec
+               FROM vectors v JOIN notes n ON n.id = v.note_id"""
+        ).fetchall()
+        return [dict(r) for r in rows]
     finally:
         con.close()
 

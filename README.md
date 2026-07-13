@@ -145,6 +145,10 @@ export notes/anki · backup · purge        your data: a readable folder, one po
 daemon · doctor · list · dedupe · reindex housekeeping
 ```
 
+`dedupe --semantic` also catches the same content re-posted under a different URL:
+same-source reposts are merged, cross-source echoes are flagged (that is corroboration,
+not a duplicate) — one threshold that keeps the credibility ledger honest.
+
 `export notes` writes a plain folder of Markdown you own; `backup` bundles the whole
 library into one `.zip`; `purge --source <key>` or `purge --all` erases it (irreversibly,
 after a confirmation and a safety backup). No lock-in is not a slogan here — it is a command.
