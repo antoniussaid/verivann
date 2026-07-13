@@ -825,13 +825,13 @@ def mirror_rows(staging_dir: Path, days: int = 30) -> dict:
                       SUM(CASE WHEN f.verdict = 'dropped' THEN 1 ELSE 0 END) AS dropped,
                       SUM(CASE WHEN f.verdict IS NULL THEN 1 ELSE 0 END) AS unjudged
                FROM notes n LEFT JOIN feedback f ON f.note_id = n.id
-               WHERE n.created_at >= datetime('now', ?)""",
+               WHERE julianday(n.created_at) >= julianday('now', ?)""",
             (window,),
         ).fetchone()
 
         kinds = con.execute(
             """SELECT source_kind AS kind, COUNT(*) AS n FROM notes
-               WHERE created_at >= datetime('now', ?) GROUP BY source_kind""",
+               WHERE julianday(created_at) >= julianday('now', ?) GROUP BY source_kind""",
             (window,),
         ).fetchall()
 
@@ -842,7 +842,7 @@ def mirror_rows(staging_dir: Path, days: int = 30) -> dict:
                FROM notes n
                LEFT JOIN sources s ON s.key = n.source_key
                LEFT JOIN feedback f ON f.note_id = n.id
-               WHERE n.created_at >= datetime('now', ?)
+               WHERE julianday(n.created_at) >= julianday('now', ?)
                GROUP BY n.source_key ORDER BY minutes DESC LIMIT 5""",
             (window,),
         ).fetchall()
@@ -1193,7 +1193,7 @@ def untouched_notes(staging_dir: Path, days: int, limit: int = 200) -> list[dict
                LEFT JOIN signals g ON g.note_id = n.id
                LEFT JOIN sources s ON s.key = n.source_key
                WHERE f.note_id IS NULL AND g.note_id IS NULL
-                 AND n.created_at <= datetime('now', ?)
+                 AND julianday(n.created_at) <= julianday('now', ?)
                GROUP BY n.id ORDER BY n.created_at ASC LIMIT ?""",
             (f"-{int(days)} days", limit),
         ).fetchall()
