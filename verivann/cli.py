@@ -77,6 +77,58 @@ def _report(result: IntakeResult) -> None:
 _LENS_OPT = typer.Option(None, "--lens", "-l", help="Reading intent: see `verivann lenses`.")
 
 
+@app.command("setup")
+def setup_cmd() -> None:
+    """First run: connect a model, write your config, and open the inbox."""
+    from .setup import PRESETS, compose_env, preset, write_env
+
+    typer.echo("\n  Verivann setup\n")
+    typer.echo("  Everything works offline without a model — but a model is where it comes alive")
+    typer.echo("  (summaries, claims, predictions, the credibility ledger). Let's connect one.\n")
+    typer.echo("  Providers (the free ones are first):\n")
+    for i, p in enumerate(PRESETS, 1):
+        tag = "free" if p.free else "paid"
+        tag = "local · free" if p.local else tag
+        typer.echo(f"    {i}) {p.label:<44} [{tag}]")
+        typer.echo(f"       {p.hint}")
+    typer.echo(f"    {len(PRESETS) + 1}) Skip — run offline on the heuristic for now\n")
+
+    choice = typer.prompt("  Which one", default=str(len(PRESETS) + 1))
+    if not choice.isdigit() or int(choice) > len(PRESETS):
+        typer.echo("\n  No model configured — Verivann will run on the offline heuristic.")
+        typer.echo("  Re-run `verivann setup` any time. Opening the inbox…\n")
+        _maybe_serve()
+        return
+
+    p = PRESETS[int(choice) - 1]
+    account = typer.prompt("  Cloudflare account id") if p.needs_account else ""
+    api_key = typer.prompt(f"  {p.label} API key", hide_input=True) if p.needs_key else ""
+    model = typer.prompt("  Model", default=p.default_model) if p.default_model else typer.prompt("  Model")
+
+    values = compose_env(p.key, account=account, api_key=api_key, model=model)
+    env_path = Path(".env")
+    if env_path.is_file():
+        typer.echo(f"\n  {env_path} already exists — your model settings will be merged in.")
+    write_env(env_path, values)
+
+    shown = {k: (v if not k.endswith("API_KEY") else "•" * 8) for k, v in values.items()}
+    typer.echo(f"\n  Wrote {env_path}:")
+    for k, v in shown.items():
+        typer.echo(f"    {k}={v}")
+    if preset(p.key) and not preset(p.key).default_embed:
+        typer.echo("\n  (This provider has no embeddings endpoint, so meaning-search stays off.")
+        typer.echo("   Add a local one any time: VERIVANN_EMBED_MODEL=nomic-embed-text via Ollama.)")
+    typer.echo("\n  Done. Check it with `verivann doctor`.\n")
+    _maybe_serve()
+
+
+def _maybe_serve() -> None:
+    if typer.confirm("  Open the inbox now?", default=True):
+        from .web import serve
+
+        serve()
+
+
 @app.command("ingest-text")
 def ingest_text(
     text: str = typer.Argument(..., help="Arbitrary text to digest."),
