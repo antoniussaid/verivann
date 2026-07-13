@@ -424,13 +424,17 @@ PAGE = """<!doctype html>
     "?u='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title)})()";
   $('bm').addEventListener('click', (e) => e.preventDefault());
 
-  // Shared in from the phone, the extension, or the bookmarklet: digest on arrival.
+  // Shared in from the phone, the extension, or the bookmarklet: pre-fill and wait for
+  // one click. We do NOT auto-digest: a cross-site link to /?u=… is indistinguishable
+  // from a genuine share, so auto-firing would let any website drive this page (which
+  // holds the token) into fetching a URL and staging a note — a confused-deputy. One
+  // deliberate press closes that, and the shared value is already in the box, ready.
   const shared = (params.get('u') || params.get('text') || '').trim();
   if (shared) {
     $('v').value = shared;
     if (params.get('lens')) $('lens').value = params.get('lens');
     history.replaceState({}, '', here);  // don't leave the URL (or token) in the bar
-    digest();
+    $('go').focus();  // Enter or click digests — a conscious commit, not a drive-by
   }
 </script>
 </body>

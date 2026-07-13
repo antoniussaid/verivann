@@ -56,8 +56,11 @@ def accept(note_id: str, target_dir: Path, config: Config | None = None) -> Acce
     target_dir.mkdir(parents=True, exist_ok=True)
     # A commit gate must never destroy what is already in the user's vault: a name
     # collision with a *different* note gets its own file; re-accepting the *same*
-    # note (matched by id) updates in place.
+    # note (matched by id) updates in place. If no safe path can be found at all, we
+    # refuse rather than overwrite someone else's note.
     target = _unclobbered(target_dir / source.name, content)
+    if target is None:
+        return None
     target.write_text(content, encoding="utf-8")
 
     # Accepting is the strongest possible "keep" — the router should learn from it,
@@ -102,12 +105,13 @@ def _note_id_of(text: str) -> str:
     return m.group(1) if m else ""
 
 
-def _unclobbered(target: Path, content: str) -> Path:
+def _unclobbered(target: Path, content: str) -> Path | None:
     """A free path that never overwrites a *different* note already in the vault.
 
     Re-accepting the same note (same `id`, even on a later day) reuses its file;
     a real filename collision with another note gets a numeric suffix instead of
-    silently destroying it.
+    silently destroying it. Returns None if no safe path exists (so the caller
+    refuses rather than clobbering) — fail closed, never fail open.
     """
     new_id = _note_id_of(content)
 
@@ -123,7 +127,7 @@ def _unclobbered(target: Path, content: str) -> Path:
         candidate = target.with_name(f"{target.stem}-{n}{target.suffix}")
         if not candidate.exists() or same_note(candidate):
             return candidate
-    return target  # 1000 same-named different notes: give up gracefully
+    return None  # 1000 same-named different notes: refuse, don't overwrite one of them
 
 
 def accept_all(note_ids: list[str], target_dir: Path, config: Config | None = None) -> list[Accepted]:

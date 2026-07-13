@@ -176,6 +176,17 @@ def test_unclobbered_suffixes_a_colliding_different_note(tmp_path):
     assert chosen == tmp_path / "note-2.md"
 
 
+def test_unclobbered_fails_closed_when_no_safe_path_exists(tmp_path, monkeypatch):
+    """If every candidate is taken by a DIFFERENT note, refuse — never overwrite one."""
+    from verivann import accept as acc
+
+    monkeypatch.setattr(acc.Path, "exists", lambda self: True)  # every name is taken...
+    monkeypatch.setattr(  # ...by a stranger, never a matching id
+        acc.Path, "read_text", lambda self, encoding=None: "---\nid: someone-else\n---\n"
+    )
+    assert _unclobbered(tmp_path / "note.md", "---\nid: mine\n---\n") is None
+
+
 # --- default_target. --------------------------------------------------------------
 
 def test_default_target_reads_the_env(monkeypatch, tmp_path):

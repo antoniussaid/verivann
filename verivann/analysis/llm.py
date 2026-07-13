@@ -98,21 +98,68 @@ class ModelHijacked(Exception):
 
 
 def _canary_leaked(canary: str, reply: str) -> bool:
-    """Tolerant detection: plain, whitespace-spread, base64, or hex-encoded."""
-    if canary in reply:
+    """Did the model emit its control token, in any form a hijacker might reach for?
+
+    A determined attacker won't echo the token verbatim — they'll lowercase it, space
+    it out with dots or zero-width joiners, or base64/hex it. So:
+      * the 12-hex secret is matched CASE-INSENSITIVELY against the reply stripped of
+        every non-alphanumeric character — catching plaintext, any case, and any
+        separator (space, ".", "•", U+200B, even the hyphen);
+      * base64 and hex are caught by DECODING candidate runs and looking for the token
+        inside — so alignment/offset can't dodge it (the old encode-and-match only
+        fired when the token happened to start on a 3-byte boundary).
+    The 12-hex payload is a fresh 48-bit secret per call, so a false positive on
+    innocent text is astronomically unlikely.
+    """
+    payload = canary.split("-", 1)[1].lower()  # the 12 hex chars — the actual secret
+    canary_low = canary.lower()
+
+    if payload in re.sub(r"[^a-z0-9]", "", reply.lower()):
         return True
-    compact = re.sub(r"\s+", "", reply)
-    if canary in compact:  # "C N R Y - …" spread out to dodge a substring check
-        return True
-    if base64.b64encode(canary.encode()).decode().rstrip("=") in compact:
-        return True
-    return canary.encode().hex() in compact.lower()
+    for decoded in _decoded_runs(reply):
+        low = decoded.lower()
+        if canary_low in low or payload in re.sub(r"[^a-z0-9]", "", low):
+            return True
+    return False
+
+
+def _decoded_runs(reply: str):
+    """Yield the base64- and hex-decoded text of every long token-ish run in a reply."""
+    for run in re.findall(r"[A-Za-z0-9+/=]{16,}", reply):
+        body = run.rstrip("=")
+        for pad in ("", "=", "==", "==="):
+            try:
+                yield base64.b64decode(body + pad, validate=False).decode("utf-8", "ignore")
+                break
+            except Exception:  # noqa: BLE001 - not valid base64 at this padding; try next
+                continue
+    for run in re.findall(r"[0-9A-Fa-f]{16,}", reply):
+        even = run if len(run) % 2 == 0 else run[:-1]
+        try:
+            yield bytes.fromhex(even).decode("utf-8", "ignore")
+        except ValueError:
+            continue
 
 
 def _scrub_canary(canary: str, reply: str) -> str:
-    reply = reply.replace(canary, "[REDACTED]")
-    spaced = r"\s*".join(re.escape(c) for c in canary)  # also collapse a spaced-out leak
-    return re.sub(spaced, "[REDACTED]", reply)
+    """Redact the token in every form _canary_leaked can detect, so a caught leak is
+    never persisted — plaintext (any case), separator-spread, and encoded runs."""
+    reply = re.sub(re.escape(canary), "[REDACTED]", reply, flags=re.IGNORECASE)
+    spread = r"[^A-Za-z0-9]*".join(re.escape(c) for c in canary)  # "C . N . R . Y - …"
+    reply = re.sub(spread, "[REDACTED]", reply, flags=re.IGNORECASE)
+
+    payload = canary.split("-", 1)[1].lower()
+    canary_low = canary.lower()
+
+    def _redact_encoded(match: re.Match) -> str:
+        for decoded in _decoded_runs(match.group(0)):
+            low = decoded.lower()
+            if canary_low in low or payload in re.sub(r"[^a-z0-9]", "", low):
+                return "[REDACTED]"
+        return match.group(0)
+
+    reply = re.sub(r"[A-Za-z0-9+/=]{16,}", _redact_encoded, reply)
+    return re.sub(r"[0-9A-Fa-f]{16,}", _redact_encoded, reply)
 
 
 def llm_analyze(extracted: Extracted, config, lens: str | None = None, preference: str = "") -> Analysis:

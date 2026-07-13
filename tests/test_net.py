@@ -21,6 +21,13 @@ def test_public_addresses_pass():
     assert check_url("https://93.184.216.34/") is None
 
 
+def test_non_global_ranges_are_refused_by_default_deny():
+    # Deny-by-enumeration missed these; a default-deny (is_global) catches them.
+    assert check_url("http://100.100.100.200/latest/meta-data/") is not None  # Alibaba metadata (CGNAT)
+    assert check_url("http://100.64.5.5:6379/") is not None                    # RFC6598 shared / CGNAT
+    assert check_url("http://198.18.0.1/") is not None                         # benchmarking range
+
+
 def test_non_http_schemes_are_refused():
     assert check_url("file:///etc/passwd") is not None
     assert check_url("ftp://host/") is not None

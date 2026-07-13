@@ -8,8 +8,10 @@ dutifully fetch it and hand the result back.
 
 So every server-side HTTP fetch goes through `safe_get`, which:
   * allows only http/https,
-  * resolves the host and refuses any IP that is loopback / private / link-local /
-    reserved / multicast (this is what stops the metadata endpoint), and
+  * resolves the host and refuses any IP that is not globally routable — a
+    default-deny check (`is_global`), not a blocklist of known-bad ranges, so
+    CGNAT/shared address space (incl. some clouds' metadata) and future special
+    ranges are refused too, not just loopback/private/link-local, and
   * follows redirects **manually**, re-checking every hop — because a public URL
     that 302s to `http://127.0.0.1` would otherwise slip straight through.
 
@@ -48,6 +50,14 @@ def _blocked_ip(ip: ipaddress._BaseAddress) -> str | None:
         return "multicast"
     if ip.is_unspecified:
         return "the unspecified address"
+    # Default-DENY, not deny-by-enumeration: refuse anything that is not globally
+    # routable. The named checks above stay only to give a precise reason for the
+    # common cases; this line is the real guard, and it also stops the ranges the
+    # enumeration missed — CGNAT/shared address space (100.64.0.0/10, which holds
+    # Alibaba Cloud's metadata at 100.100.100.200), 6to4 relay (192.88.99.0/24),
+    # benchmarking, and any future special-use range.
+    if not getattr(ip, "is_global", False):
+        return "not a globally routable address"
     return None
 
 

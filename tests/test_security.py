@@ -203,6 +203,61 @@ def test_the_canary_catches_a_leak_smuggled_out_encoded(monkeypatch, tmp_path):
         assert result.event.provenance.content_trust == "hostile"
 
 
+def test_canary_detection_resists_every_known_evasion():
+    """Case-shift, non-whitespace separators, and offset-misaligned encodings — the
+    evasions an adversarial audit found — must all still be caught."""
+    import base64
+
+    from verivann.analysis.llm import _canary_leaked
+
+    canary = "CNRY-AB12CD34EF56"
+    evasions = {
+        "verbatim": canary,
+        "lowercase": canary.lower(),                                  # case-shift
+        "spaced": " ".join(canary),
+        "dotted": ".".join(canary),                                   # non-whitespace sep
+        "zero-width": "​".join(canary),                          # Cf, not \s
+        "base64-aligned": base64.b64encode(canary.encode()).decode(),
+        "base64-prefixed": base64.b64encode(f"token={canary}".encode()).decode(),  # misaligned
+        "hex": canary.encode().hex(),
+        "hex-prefixed": f"token={canary}".encode().hex(),
+    }
+    for name, reply in evasions.items():
+        assert _canary_leaked(canary, reply), f"missed the {name} leak"
+
+
+def test_canary_detection_does_not_false_positive_on_clean_replies():
+    from verivann.analysis.llm import _canary_leaked
+
+    canary = "CNRY-AB12CD34EF56"
+    for clean in (
+        "A normal analysis about local-first software and sovereignty.",
+        "Commit a1b2c3d4e5f60718 and a long sha " + "deadbeefcafe" * 4,
+        "Base64 sample: " + "aGVsbG8gd29ybGQgdGhpcyBpcyBmaW5l",
+    ):
+        assert not _canary_leaked(canary, clean)
+
+
+def test_a_detected_leak_is_scrubbed_in_every_encoding():
+    """When a leak is caught, the stored reply must not still carry the token."""
+    import base64
+    import re
+
+    from verivann.analysis.llm import _scrub_canary
+
+    canary = "CNRY-AB12CD34EF56"
+    payload = "ab12cd34ef56"
+    for reply in (
+        f"leaked: {canary}",
+        f"leaked: {canary.lower()}",
+        ".".join(canary),
+        f"here {canary.encode().hex()}",
+        base64.b64encode(f"x={canary}".encode()).decode(),
+    ):
+        scrubbed = _scrub_canary(canary, reply)
+        assert payload not in re.sub(r"[^a-z0-9]", "", scrubbed.lower())
+
+
 def test_the_canary_guards_a_secondary_model_call(monkeypatch, tmp_path):
     """The canary is not only on the analysis path — every model call is guarded.
 
