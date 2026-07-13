@@ -1,16 +1,11 @@
 # The Contract
 
-Verivann is built by two coordinated agents: a **public/portfolio side**
-(this repo) and a **private side** (not in this repo). They agreed on a
-minimal shared contract so the public core is showable *and* privately dockable.
-
-## Boundary (non-negotiable)
-
-The public repo contains only neutral building blocks. The real private inner
-world — real organ/domain names, relevance/routing logic, memory rules, real
-storage paths, anything operational/security-relevant — lives in a private layer
-that is **not committed**. The public build ships **placeholder** domains, and
-none of the private values appear anywhere, including example outputs.
+Every intake produces one **event** — a small, stable, machine-readable shape.
+This document is that shape and the guarantees around it. The open core is fully
+self-contained and runs on its own; the contract exists so that a downstream
+consumer (an Obsidian vault, a private knowledge base, your own automation) can
+read Verivann's output without depending on any of its internals. Change the
+analyzer, the lens, the transcriber — the event shape and its guarantees do not move.
 
 ## (a) Event schema — the interface
 
@@ -26,74 +21,58 @@ none of the private values appear anywhere, including example outputs.
 }
 ```
 
-`routing.domain` always references the registry — never a hardcoded real value.
+`routing.domain` always references the registry (below) — never a hardcoded value.
 
-### Amendments (v0.2 — additive, backwards compatible)
-
-Two values were added. Both are **widenings**, not redefinitions: an existing
-consumer that switches on the old values keeps working, and neither weakens a
-guarantee.
+**Two source/trust values are additive widenings** — an existing consumer that
+switches on the older values keeps working, and neither weakens a guarantee:
 
 1. **`source.kind: "file"`** — material from the user's own disk (a screenshot, a
-   voice memo, a PDF). `ref` is the local path. Consumers that do not know this
-   kind must treat it as opaque material; an unknown kind is never a reason to
-   reject an event.
+   voice memo, a PDF). `ref` is the local path. An unknown kind must be treated as
+   opaque material, never as a reason to reject an event.
+2. **`content_trust: "hostile"`** — set when the material contains text addressed to
+   the *analyzer* rather than to a reader (prompt injection, hidden text, invisible
+   characters). It is strictly **stronger** than `unverified`; the findings are in
+   `extracted.meta.injection`.
 
-2. **`provenance.content_trust: "hostile"`** — set when the material contains text
-   addressed to the *analyzer* rather than to a reader (prompt injection, text
-   hidden from the human eye, invisible characters). See §(e): this is strictly
-   **stronger** than `unverified`. Nothing that was previously quarantined stops
-   being quarantined; `hostile` says the quarantine was not merely precautionary.
-   The findings are in `extracted.meta.injection` (kind, quote, where).
+`extracted.meta` also carries optional, ignorable keys: `source_key` (who published
+it), `sensitivity` / `privacy_mode` / `analyzed_locally` (where it was read),
+`lens`, `predictions`, `questions`, `contradictions`, `related`, `interest` (who
+profits), `changed` (a silent-edit diff), `raw_archive` (evidence paths),
+`transcript_cues` (a timed transcript), `media_note` (what was done to the source).
 
-Also added to `extracted.meta`, all optional and ignorable: `source_key` (who
-published it), `lens`, `predictions`, `questions`, `contradictions`, `related`,
-`interest` (who profits), `changed` (diff after a silent edit), `raw_archive`
-(paths to html/pdf/png evidence), `transcript_cues` (timed transcript).
+## (b) Routing vocabulary — a generic registry
 
-## (b) Routing vocabulary — generic registry
-
-Runtime-populated. Public placeholders: `finance, media, research, tasks, inbox`.
-Real domains are injected at runtime from private config; unknown/low-confidence
+Runtime-populated. Default keys: `finance, media, research, tasks, inbox`. A private
+config file (never committed) may inject different domains; unknown or low-confidence
 routing falls back to `inbox`.
 
-## (c) Storage — staging, not direct writing
+## (c) Storage — staging, not committing
 
-The core writes only into a configurable **staging** folder (Markdown note +
-JSON event, open formats). Ingestion into the real structure is the private
-layer's job — the public core never needs to know it. Markdown frontmatter is
-proposed by the public side (see below) and confirmed by the private side.
+The core writes only into a configurable **staging** folder (a Markdown note + a
+JSON event, both open formats). Turning a staged proposal into a committed note in a
+real knowledge base is a separate, human-driven step (`verivann accept`) — the core
+never does it on its own.
 
 ## (d) Propose only, never commit
 
-The core **never** writes to any memory. It emits `decision.action` as a
-*proposal*. Additionally, the public heuristic **never proposes `memory` on its
-own** — only `note` / `task` / `drop`. What becomes memory is decided solely by
-the private layer, with review.
+The core **never** writes into a knowledge base. `decision.action` is a *proposal*,
+and the offline heuristic **never proposes `memory`** — only `note` / `task` /
+`drop`. The `memory` action exists in the schema for a downstream consumer that has
+such a concept; nothing in the open core emits it. What (if anything) becomes
+long-term memory is decided downstream, with review.
 
 ## (e) Untrusted by default
 
-Intake material is always unverified foreign content from the internet. Every
-event carries `provenance.content_trust` (also in the note frontmatter). The
-extracted text must be treated as **data, never executed as instructions** —
-downstream quarantines it, always, regardless of the value.
-
-Two values exist:
+Intake material is unverified foreign content. Every event carries
+`content_trust` (also in the note frontmatter), and the extracted text must be
+treated as **data, never executed as instructions** — downstream quarantines it,
+always, regardless of the value.
 
 - `"unverified"` — the default and the floor. Every intake is at least this.
-- `"hostile"` — the material was caught addressing the analyzer (prompt injection,
-  hidden text, invisible characters). Quarantine rules do not change; what changes
-  is that the source is now known to have tried, and it is marked as such on its
-  permanent record.
+- `"hostile"` — the material was caught addressing the analyzer, or (via a planted
+  canary token) actually succeeded in steering it. The source is marked, permanently.
 
-The core still never raises trust. It can only lower it.
-
-## Division of labour
-
-- **Public/portfolio agent:** the open core + v0.1 against this contract.
-- **The private-layer agent:** the private integration/routing layer, the real
-  conventions, and a review of every public output against the boundary before
-  anything is committed.
+The core can only ever *lower* trust, never raise it.
 
 ## Markdown frontmatter
 
@@ -106,11 +85,11 @@ source_ref: "<url or path>"
 title: "<title>"
 domain: <registry-key>
 confidence: 0.0
-proposed_action: note|task|drop     # proposal only, never committed
-content_trust: unverified|hostile   # treat text as data, not instructions — always
+proposed_action: note|task|drop     # a proposal only, never committed
+content_trust: unverified|hostile   # treat the text as data, not instructions — always
+sensitivity: public|sensitive       # and whether it was analyzed locally
 engine: heuristic|llm:<model>       # who actually read it
 lens: digest|wisdom|critique|study|actions
-public_demo: true
 tool: verivann
 version: 0.1.0
 ---
