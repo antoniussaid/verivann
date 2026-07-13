@@ -16,7 +16,15 @@ from .pipeline import IntakeResult, run
 
 app = typer.Typer(
     add_completion=False,
-    help="Verivann — raw web material -> structured, routed notes.",
+    help=(
+        "Verivann — turn anything you read, watch, or hear into a short, honest note "
+        "you own.\n\n"
+        "It never posts and never commits a note on its own — every note is a proposal "
+        "until you accept it. Along the way it flags who profits from a source, catches "
+        "material that tries to hijack the analysis, and keeps score of what each source "
+        "later turns out to be right or wrong about.\n\n"
+        "Run `verivann` with no command to see what's due. `verivann setup` to begin."
+    ),
     invoke_without_command=True,
 )
 
@@ -1434,6 +1442,50 @@ def list_intakes(limit: int = typer.Option(20, help="Max notes to show.")) -> No
         # ASCII only: the Windows console (cp1252) chokes on check marks.
         mark = {"kept": "  (kept)", "dropped": "  (dropped)"}.get(verdict_of(h.id, cfg.staging_dir), "")
         typer.echo(f"  {h.id[:8]}  [{h.domain:<8}] {h.title[:52]}{mark}")
+
+
+# ---------- one wall of 49 verbs, sorted into rooms ----------
+#
+# `verivann --help` used to list every command in one undifferentiated block. Grouping
+# them by what you're trying to DO turns the surface from intimidating into legible.
+# Set here, in one place, rather than sprinkled across 49 decorators.
+_COMMAND_GROUPS: dict[str, list[str]] = {
+    "Start here": ["setup", "serve", "doctor"],
+    "Capture — get material in": [
+        "ingest-text", "ingest-url", "ingest-youtube", "ingest-file", "ingest-batch",
+        "folder", "import",
+    ],
+    "Decide — the human gate": ["list", "review", "accept", "keep", "drop", "resurface"],
+    "Ask & challenge": [
+        "ask", "search", "question", "counter", "alloy", "clarify", "trace", "bias",
+    ],
+    "Sources & claims": [
+        "sources", "claims", "stale", "predictions", "resolve", "watch", "feed", "refresh",
+    ],
+    "Insight — what it all adds up to": [
+        "mirror", "calibrate", "models", "bakeoff", "profile", "log", "outbound",
+        "digest", "lenses",
+    ],
+    "Upkeep & your data": [
+        "reanalyze", "reindex", "dedupe", "slag", "daemon", "export", "backup", "purge",
+    ],
+}
+_GROUP_OF = {name: group for group, names in _COMMAND_GROUPS.items() for name in names}
+
+
+def _apply_help_panels() -> None:
+    """Stamp each command/sub-app with its help panel (needs rich; a no-op without)."""
+    for info in app.registered_commands:
+        panel = _GROUP_OF.get(info.name or "")
+        if panel:
+            info.rich_help_panel = panel
+    for group in app.registered_groups:  # the sub-apps: import, question, feed, watch
+        panel = _GROUP_OF.get(group.name or "")
+        if panel:
+            group.rich_help_panel = panel
+
+
+_apply_help_panels()
 
 
 def _load_dotenv() -> None:

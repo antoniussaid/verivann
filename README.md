@@ -140,9 +140,14 @@ watch add/run · refresh                   silent edits, and notes that learn wh
 keep · drop · review · clarify · profile  teach the router (and let it ask, once)
 accept --to <dir>                         the one committing act
 alloy <id> <id>                           melt several sources into one
-reanalyze · digest · export anki · log    re-read with a model, the week, cards, the furnace log
+reanalyze · digest · log                  re-read with a model, the week, the furnace log
+export notes/anki · backup · purge        your data: a readable folder, one portable .zip, or gone
 daemon · doctor · list · dedupe · reindex housekeeping
 ```
+
+`export notes` writes a plain folder of Markdown you own; `backup` bundles the whole
+library into one `.zip`; `purge --source <key>` or `purge --all` erases it (irreversibly,
+after a confirmation and a safety backup). No lock-in is not a slogan here — it is a command.
 
 ## Is it private? Is it legal?
 
