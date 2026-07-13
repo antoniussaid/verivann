@@ -34,7 +34,7 @@ def extract_media(url: str, subs_dir: Path | None = None, ask=None) -> Extracted
 
     try:
         proc = subprocess.run(
-            ["yt-dlp", "--dump-single-json", "--no-warnings", "--skip-download", url],
+            ["yt-dlp", "--dump-single-json", "--no-warnings", "--skip-download", "--", url],
             capture_output=True,
             text=True,
             timeout=90,
@@ -128,7 +128,7 @@ def _fetch_subtitles(
             [
                 "yt-dlp", "--skip-download", "--write-subs", "--write-auto-subs",
                 "--sub-langs", "en.*,de.*", "--sub-format", "json3/vtt/best",
-                "--no-warnings", "-o", str(work / "%(id)s.%(ext)s"), url,
+                "--no-warnings", "-o", str(work / "%(id)s.%(ext)s"), "--", url,
             ],
             capture_output=True,
             text=True,

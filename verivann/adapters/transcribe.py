@@ -48,7 +48,7 @@ def maybe_transcribe(url: str, work_base: Path | None) -> tuple[str | None, str 
 
 def _download_audio(url: str, work: Path) -> Path | None:
     proc = subprocess.run(
-        ["yt-dlp", "-f", "bestaudio/best", "--no-warnings", "-o", str(work / "audio.%(ext)s"), url],
+        ["yt-dlp", "-f", "bestaudio/best", "--no-warnings", "-o", str(work / "audio.%(ext)s"), "--", url],
         capture_output=True,
         text=True,
         timeout=300,

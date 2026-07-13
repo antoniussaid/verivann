@@ -17,12 +17,14 @@ from .pipeline import IntakeResult, run
 
 def list_entries(url: str, limit: int = 20) -> list[str]:
     """Enumerate the URLs behind a playlist/channel. Empty on any failure."""
-    if shutil.which("yt-dlp") is None:
+    from .net import check_url  # batch is not behind the pipeline chokepoint
+
+    if shutil.which("yt-dlp") is None or check_url(url):
         return []
     try:
         proc = subprocess.run(
             ["yt-dlp", "--flat-playlist", "--dump-single-json", "--no-warnings",
-             "--playlist-end", str(limit), url],
+             "--playlist-end", str(limit), "--", url],
             capture_output=True,
             text=True,
             timeout=180,

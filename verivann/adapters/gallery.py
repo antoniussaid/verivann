@@ -66,7 +66,7 @@ def extract_gallery(url: str, work_base: Path | None) -> Extracted | None:
         return None
     try:
         subprocess.run(
-            cmd + ["--range", f"1-{_MAX_IMAGES}", "-D", str(work), url],
+            cmd + ["--range", f"1-{_MAX_IMAGES}", "-D", str(work), "--", url],
             capture_output=True,
             text=True,
             timeout=240,

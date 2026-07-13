@@ -74,7 +74,7 @@ def video_onscreen_text(url: str, work_base: Path | None, max_frames: int = 6) -
 
 def _download_video(url: str, work: Path) -> Path | None:
     proc = subprocess.run(
-        ["yt-dlp", "-f", "worst[ext=mp4]/worst", "--no-warnings", "-o", str(work / "v.%(ext)s"), url],
+        ["yt-dlp", "-f", "worst[ext=mp4]/worst", "--no-warnings", "-o", str(work / "v.%(ext)s"), "--", url],
         capture_output=True,
         text=True,
         timeout=300,

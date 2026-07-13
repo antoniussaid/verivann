@@ -79,7 +79,13 @@ def archive_url(url: str, dest_dir: Path, stem: str) -> Path | None:
     except OSError:
         return None
     out = dest_dir / f"{stem}.html"
-    cmd = ["monolith", url, "-o", str(out)] if tool == "monolith" else ["single-file", url, str(out)]
+    # `--` ends options so a hostile "URL" cannot be read as a flag (the URL is also
+    # already validated by archive_all's check_url guard).
+    cmd = (
+        ["monolith", "-o", str(out), "--", url]
+        if tool == "monolith"
+        else ["single-file", "--", url, str(out)]
+    )
     return _run(cmd, out, timeout=180)
 
 

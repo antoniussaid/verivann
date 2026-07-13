@@ -64,6 +64,14 @@ def test_safe_get_returns_a_normal_response(monkeypatch):
     assert resp.status_code == 200 and resp.text == "hello"
 
 
+def test_batch_refuses_an_internal_playlist_url():
+    from verivann.batch import list_entries
+
+    # Never shells out to yt-dlp for an internal address, whatever is installed.
+    assert list_entries("http://127.0.0.1:8080/playlist") == []
+    assert list_entries("http://169.254.169.254/") == []
+
+
 def test_the_pipeline_refuses_an_internal_url_without_fetching(monkeypatch, tmp_path):
     from verivann.config import Config
     from verivann.pipeline import run
