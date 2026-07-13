@@ -1,0 +1,55 @@
+name: Bug report
+description: Something didn't work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Verivann runs on your machine, so the diagnostics below are
+        what let it be fixed without me being able to see your setup.
+
+        **Security issue?** Don't file it here — use the Security tab → *Report a
+        vulnerability* instead (see SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, and what happened instead?
+      placeholder: I ran `vv ingest-url …` and expected a note, but …
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The exact command(s), and the input if it isn't private.
+      placeholder: |
+        1. vv ingest-url "https://…"
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `vv doctor`
+      description: >
+        Paste the full output. This answers half of every bug report — Python version,
+        which optional tools are present, whether a model is configured, and (often the
+        culprit) whether yt-dlp is stale. Redact anything you consider private.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Verivann version
+      description: The first line of `vv doctor`, e.g. "verivann 0.1.0".
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Windows 11 / macOS 14 / Ubuntu 24.04
+    validations:
+      required: true

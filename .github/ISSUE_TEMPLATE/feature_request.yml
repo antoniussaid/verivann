@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an idea or an improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas are welcome. Verivann has a strong point of view (see CONTRIBUTING.md), so
+        the most useful suggestions fit its grain: local-first, propose-only, orchestrate
+        rather than bundle. It's fine if yours doesn't yet — describe the need and we'll
+        find the shape together.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The underlying need, not just the feature. What are you stuck on today?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+      description: The change or capability you have in mind, however rough.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything you've tried or considered
+      description: Workarounds, other tools, or approaches you already ruled out.
+    validations:
+      required: false

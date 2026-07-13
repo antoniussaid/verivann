@@ -167,8 +167,10 @@ Verivann is free and open source under the [MIT License](LICENSE). It is a
 donation-supported project with no commercial tier and no cloud service — if it is
 useful to you, a sponsorship keeps it going, but nothing is gated.
 
-Issues and pull requests welcome. (For now the author reviews changes personally; a
-CONTRIBUTING guide will follow.)
+Issues and pull requests welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md) for
+setup and the invariants that keep Verivann itself. Found a security problem? Please
+report it privately: [SECURITY.md](SECURITY.md). Everyone is expected to follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Docs
 

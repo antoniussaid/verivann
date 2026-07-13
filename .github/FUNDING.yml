@@ -1,0 +1,22 @@
+# Verivann is free and open source, funded only by donations — no business, no cloud
+# bills to cover, no ongoing obligation. A donation button is optional and OFF until you
+# turn it on, because a button that points at an account you don't have yet renders as a
+# BROKEN "Sponsor" link on GitHub — worse than none.
+#
+# To enable it, uncomment ONE line below and put in your handle, then commit:
+#
+#   1. GitHub Sponsors (simplest, integrated, no third party):
+#      - Enable it once for your account at https://github.com/sponsors  (a short setup),
+#      - then uncomment the next line and replace YOUR_GITHUB_USERNAME:
+#
+# github: YOUR_GITHUB_USERNAME
+#
+#   2. Ko-fi (one-off tips, no platform fees to set up):
+#      - Create a page at https://ko-fi.com, then:
+#
+# ko_fi: YOUR_KOFI_NAME
+#
+#   3. Others GitHub supports: open_collective, buy_me_a_coffee, liberapay, patreon, …
+#      See https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+#
+# Leave everything commented to ship with no button (the current, safe default).

@@ -1,0 +1,10 @@
+# Steer the two things that shouldn't be plain issues: security reports (private) and
+# open-ended questions (discussion, not a bug). Blank issues stay off so every report
+# arrives with the fields that make it actionable.
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/security/advisories
+    about: >
+      Please report security problems privately via the repository's Security tab →
+      "Report a vulnerability", never as a public issue. See SECURITY.md.
