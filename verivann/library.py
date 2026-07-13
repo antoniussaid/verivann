@@ -50,6 +50,13 @@ def _connect(staging_dir: Path) -> sqlite3.Connection:
     staging_dir.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(_db_path(staging_dir))
     con.row_factory = sqlite3.Row
+    # The daemon writes while the CLI reads. WAL lets readers and one writer coexist
+    # without blocking; busy_timeout waits out a lock instead of throwing "database is
+    # locked"; synchronous=NORMAL is durable under WAL and much faster. All are safe
+    # no-ops if the filesystem can't honour them (the PRAGMA just reports the old mode).
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("PRAGMA busy_timeout=5000")
+    con.execute("PRAGMA synchronous=NORMAL")
     con.execute(
         """CREATE TABLE IF NOT EXISTS notes (
             id TEXT PRIMARY KEY, created_at TEXT, source_kind TEXT, source_ref TEXT,
@@ -152,8 +159,37 @@ def _connect(staging_dir: Path) -> sqlite3.Connection:
     _ensure_canon(con)  # after every table exists: the backfill writes into `sources`
     _ensure_claim_expiry(con)
     _ensure_feedback_origin(con)
+    _ensure_indexes(con)  # after the late columns exist (canon, source_key, expires_at)
     con.commit()
     return con
+
+
+# Indexes for the columns the reporting and graph-walk queries actually filter, join,
+# and order on. Every one points at a real access pattern (JOIN … ON, WHERE, ORDER BY,
+# GROUP BY) in the queries below; PK columns (feedback.note_id, sources.key, vectors.
+# note_id, bakeoff/evidence prefixes) are already indexed and are not repeated here.
+_INDEXES = (
+    "CREATE INDEX IF NOT EXISTS idx_notes_created_at ON notes(created_at)",
+    "CREATE INDEX IF NOT EXISTS idx_notes_canon ON notes(canon)",
+    "CREATE INDEX IF NOT EXISTS idx_notes_source_key ON notes(source_key)",
+    "CREATE INDEX IF NOT EXISTS idx_claims_note_id ON claims(note_id)",
+    "CREATE INDEX IF NOT EXISTS idx_claims_expires_at ON claims(expires_at)",
+    "CREATE INDEX IF NOT EXISTS idx_predictions_note_id ON predictions(note_id)",
+    "CREATE INDEX IF NOT EXISTS idx_predictions_status ON predictions(status)",
+    "CREATE INDEX IF NOT EXISTS idx_contradictions_old ON contradictions(old_note)",
+    "CREATE INDEX IF NOT EXISTS idx_contradictions_new ON contradictions(new_note)",
+    "CREATE INDEX IF NOT EXISTS idx_feedback_verdict ON feedback(verdict)",
+    "CREATE INDEX IF NOT EXISTS idx_signals_note_id ON signals(note_id)",
+    "CREATE INDEX IF NOT EXISTS idx_evidence_note_id ON evidence(note_id)",
+    "CREATE INDEX IF NOT EXISTS idx_outbound_note_id ON outbound(note_id)",
+    "CREATE INDEX IF NOT EXISTS idx_highlights_note_id ON highlights(note_id)",
+    "CREATE INDEX IF NOT EXISTS idx_feed_items_feed_url ON feed_items(feed_url)",
+)
+
+
+def _ensure_indexes(con: sqlite3.Connection) -> None:
+    for statement in _INDEXES:
+        con.execute(statement)
 
 
 _LATE_COLUMNS = {

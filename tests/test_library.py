@@ -26,3 +26,49 @@ def test_reindex_is_idempotent(tmp_path):
     index_event(_ev("a", "First", "hello world one"), "n.md", "e.json", tmp_path)
     index_event(_ev("a", "First v2", "hello world two"), "n.md", "e.json", tmp_path)
     assert count(tmp_path) == 1  # INSERT OR REPLACE keeps one row per id
+
+
+# --- Storage hygiene: concurrency-friendly PRAGMAs + indexes on the hot columns. ---
+
+def test_connection_uses_wal_and_a_busy_timeout(tmp_path):
+    from verivann.library import _connect
+
+    con = _connect(tmp_path)
+    try:
+        assert con.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal"
+        assert con.execute("PRAGMA busy_timeout").fetchone()[0] >= 5000
+    finally:
+        con.close()
+
+
+def test_the_hot_columns_are_indexed(tmp_path):
+    from verivann.library import _INDEXES, _connect
+
+    con = _connect(tmp_path)
+    try:
+        names = {r["name"] for r in con.execute("PRAGMA index_list(notes)")}
+        # notes' own reporting/dedupe columns are covered...
+        assert {"idx_notes_created_at", "idx_notes_canon", "idx_notes_source_key"} <= names
+        # ...and every declared index exists somewhere in the schema.
+        declared = {stmt.split(" idx_")[1].split(" ")[0] for stmt in _INDEXES}
+        present = {r[1] for r in con.execute(
+            "SELECT type, name FROM sqlite_master WHERE type='index'"
+        )}
+        assert {f"idx_{d}" for d in declared} <= present
+    finally:
+        con.close()
+
+
+def test_a_query_on_created_at_uses_its_index(tmp_path):
+    from verivann.library import _connect
+
+    index_event(_ev("a", "t", "some body text"), "n.md", "e.json", tmp_path)
+    con = _connect(tmp_path)
+    try:
+        plan = con.execute(
+            "EXPLAIN QUERY PLAN SELECT id FROM notes ORDER BY created_at DESC LIMIT 5"
+        ).fetchall()
+        detail = " ".join(str(r[-1]) for r in plan)
+        assert "idx_notes_created_at" in detail  # the ORDER BY rides the index, no scan+sort
+    finally:
+        con.close()
