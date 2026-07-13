@@ -1,0 +1,43 @@
+[project]
+name = "smelt"
+version = "0.1.0"
+description = "Internet material -> structured, routed notes. A local intake router."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = [
+    "pydantic>=2.6",
+    "typer>=0.12",
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+whisper = ["faster-whisper>=1.0"]
+documents = ["pypdf>=4.0"]  # PDFs, when poppler's pdftotext is not installed
+
+[project.scripts]
+smelt = "smelt.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["smelt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 108
+target-version = "py310"  # the floor we support — not the version we develop on
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",    # long lines are caught by the formatter, not by shouting
+    "SIM105",  # `contextlib.suppress` is not clearer than a two-line try/except here
+    "B008",    # typer's Argument()/Option() defaults are the whole idiom
+]

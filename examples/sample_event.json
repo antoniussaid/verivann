@@ -1,0 +1,30 @@
+{
+  "id": "2b21dc02-cdb6-4ed1-8396-0e25d2632e73",
+  "created_at": "2026-07-11T21:24:54.551353+00:00",
+  "source": {
+    "kind": "text",
+    "ref": "text"
+  },
+  "extracted": {
+    "title": "A local-first personal knowledge system that decides what raw web material deser…",
+    "text": "A local-first personal knowledge system that decides what raw web material deserves to become. Research on memory, routing and automation.",
+    "meta": {
+      "chars": 138
+    }
+  },
+  "routing": {
+    "domain": "research",
+    "confidence": 0.95,
+    "reason": "Matched 5 'research' keyword(s)."
+  },
+  "decision": {
+    "action": "note",
+    "target": "data\\staging\\notes\\2026-07-11-text-a-local-first-personal-knowledge-system-18805170.md"
+  },
+  "provenance": {
+    "tool": "smelt",
+    "version": "0.1.0",
+    "public_demo": true,
+    "content_trust": "unverified"
+  }
+}

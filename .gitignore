@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+
+# Local data — NEVER commit staged intakes or archives (may contain private data)
+data/
+
+# Secrets & private config — the private layer's real domains/paths live here
+.env
+.env.*
+!.env.example
+*.private.*
+private/
+private-config.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    width: 340px; background: #0a0a0d; color: #e9e7e0; padding: 18px 18px 16px;
+    font-family: ui-monospace, "JetBrains Mono", Menlo, monospace; font-size: 12px;
+  }
+  .brand { letter-spacing: .3em; font-size: 11px; color: #cbcac4; }
+  .target {
+    margin-top: 14px; padding: 11px 12px; background: #111116; border: 1px solid #26262c;
+    border-radius: 10px; color: #8f8d95; font-size: 11px; line-height: 1.5;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  select {
+    width: 100%; margin-top: 10px; background: #111116; color: #e9e7e0; border: 1px solid #26262c;
+    border-radius: 100px; padding: 9px 12px; font: inherit; font-size: 11px; outline: none; cursor: pointer;
+  }
+  button.go {
+    width: 100%; margin-top: 10px; background: #e9e7e0; color: #0a0a0d; border: none;
+    border-radius: 100px; padding: 11px; font: inherit; font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; cursor: pointer;
+  }
+  button.go:disabled { opacity: .45; cursor: default; }
+  .badges { display: none; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
+  .badge { border: 1px solid #2a2a31; border-radius: 100px; padding: 5px 11px; font-size: 10px; color: #b8b6b0; }
+  .badge b { color: #ece9e1; }
+  .warn { color: #b58b5a; }
+  .reason { display: none; margin-top: 10px; color: #6d6c74; font-size: 10.5px; line-height: 1.6; }
+  .verdict { display: none; gap: 8px; margin-top: 12px; }
+  .verdict button {
+    flex: 1; background: none; border: 1px solid #33333a; color: #8f8d95; border-radius: 100px;
+    padding: 8px; font: inherit; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+  }
+  .verdict button:hover { border-color: #6a6a72; color: #e9e7e0; }
+  .verdict button.done { border-color: #e9e7e0; color: #e9e7e0; }
+  .err { display: none; margin-top: 12px; color: #c96a6a; font-size: 10.5px; line-height: 1.6; }
+  .foot { margin-top: 14px; color: #45444b; font-size: 10px; }
+  .foot a { color: #6d6c74; }
+</style>
+</head>
+<body>
+  <div class="brand">SMELT</div>
+  <div class="target" id="target">…</div>
+  <select id="lens"></select>
+  <button class="go" id="go">Digest</button>
+
+  <div class="badges" id="badges"></div>
+  <div class="reason" id="reason"></div>
+  <div class="verdict" id="verdict">
+    <button id="keep">Keep</button>
+    <button id="drop">Drop</button>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="foot"><a href="#" id="opts">settings</a> · proposal only, nothing is committed</div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
