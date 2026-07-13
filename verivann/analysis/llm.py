@@ -14,6 +14,7 @@ content_trust=unverified contract).
 
 from __future__ import annotations
 
+import ast
 import base64
 import json
 import re
@@ -363,9 +364,81 @@ def _call_anthropic(llm: LLMConfig, system: str, user: str) -> str:
 
 
 def _parse_json(raw: str) -> dict:
-    raw = raw.strip()
-    raw = re.sub(r"^```(?:json)?|```$", "", raw, flags=re.MULTILINE).strip()
-    match = re.search(r"\{.*\}", raw, re.DOTALL)
-    if not match:
+    """Recover the analysis object from a model reply, trying progressively harder.
+
+    A stray comma or a sentence of preamble should not cost us a whole analysis and
+    send the intake down to the heuristic. Real models fence their JSON, wrap it in
+    prose, "reason" in one object before answering in another, leave trailing commas,
+    or write Python's True/False/None and single quotes. We handle each of those, in
+    order, and only a truly unrecoverable reply raises — which the caller already
+    treats as "degrade to the heuristic", never as a crash.
+    """
+    text = raw.strip()
+    text = re.sub(r"^```(?:json|JSON)?\s*", "", text)  # opening fence
+    text = re.sub(r"\s*```\s*$", "", text).strip()     # closing fence
+
+    whole = _loads_object(text)
+    if whole is not None:
+        return whole
+
+    # No clean whole-string parse: pull out every balanced {...} region (brace-aware,
+    # so a "reason then answer" reply yields two candidates) and pick the one that
+    # looks like our analysis, else the last (models reason first, answer last).
+    candidates = [obj for span in _brace_spans(text) if (obj := _loads_object(span)) is not None]
+    if not candidates:
         raise ValueError("no JSON object in LLM response")
-    return json.loads(match.group(0))
+    for obj in reversed(candidates):
+        if {"domain", "action", "summary"} & obj.keys():
+            return obj
+    return candidates[-1]
+
+
+def _loads_object(text: str) -> dict | None:
+    """Parse one string to a dict, tolerating JSON, Python-literal, and trailing-comma
+    dialects. Returns None if nothing yields a dict (never raises)."""
+    try:
+        data = json.loads(text)
+        if isinstance(data, dict):
+            return data
+    except ValueError:
+        pass
+    try:  # single quotes, True/False/None, trailing commas — but literal-only, so safe
+        data = ast.literal_eval(text)
+        if isinstance(data, dict):
+            return data
+    except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError):
+        pass
+    try:  # JSON syntax (null/true/false) that also carries a trailing comma
+        data = json.loads(re.sub(r",(\s*[}\]])", r"\1", text))
+        if isinstance(data, dict):
+            return data
+    except ValueError:
+        pass
+    return None
+
+
+def _brace_spans(text: str) -> list[str]:
+    """Every balanced top-level {...} region, ignoring braces inside string literals."""
+    spans: list[str] = []
+    depth = start = 0
+    in_str = esc = False
+    for i, ch in enumerate(text):
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            if depth == 0:
+                start = i
+            depth += 1
+        elif ch == "}" and depth:
+            depth -= 1
+            if depth == 0:
+                spans.append(text[start : i + 1])
+    return spans
