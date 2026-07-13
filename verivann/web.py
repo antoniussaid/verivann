@@ -453,6 +453,42 @@ def _kind_of(value: str, claimed: str) -> str:
     return "url" if claimed == "text" else claimed
 
 
+# ---------- request authorization (the CSRF/CORS defense) ----------
+#
+# The inbox is an HTTP API on localhost. Without a guard, ANY website the user
+# visits could `fetch()` /ask (to read the whole library) or /intake (to poison
+# it) — a classic cross-site attack against a local server. So every API call must
+# prove one of two things:
+#
+#   * it carries the session token (the page has it from the URL; a CLI/curl user
+#     passes it) — a website cannot know it; or
+#   * it comes from a browser-extension origin (chrome-extension://…), which the
+#     browser sets and a web page CANNOT forge — so our own extension works
+#     zero-config while websites stay locked out.
+#
+# CORS is never `*`: only extension origins are reflected, so even a "simple"
+# cross-origin POST from a website cannot read a response.
+
+_EXTENSION_PREFIXES = ("chrome-extension://", "moz-extension://", "safari-web-extension://")
+
+
+def _is_extension_origin(origin: str) -> bool:
+    return bool(origin) and origin.startswith(_EXTENSION_PREFIXES)
+
+
+def is_authorized(origin: str, given_token: str, configured_token: str) -> bool:
+    if _is_extension_origin(origin):
+        return True
+    if not configured_token:
+        return True  # only when explicitly run without a token
+    return bool(given_token) and secrets.compare_digest(given_token, configured_token)
+
+
+def cors_origin(origin: str) -> str | None:
+    """The only origins we ever reflect — never a wildcard."""
+    return origin if _is_extension_origin(origin) else None
+
+
 class _Handler(BaseHTTPRequestHandler):
     token = ""  # set by serve(); empty = loopback, no auth
 
@@ -463,9 +499,18 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("content-type", ctype)
         self.send_header("content-length", str(len(data)))
-        # The browser extension calls this from its own origin.
-        self.send_header("access-control-allow-origin", "*")
-        self.send_header("access-control-allow-headers", "content-type, x-verivann-token")
+        # CORS: reflect ONLY a browser-extension origin, never a wildcard, so a
+        # website can never read a response cross-origin.
+        allowed = cors_origin(self.headers.get("origin", ""))
+        if allowed:
+            self.send_header("access-control-allow-origin", allowed)
+            self.send_header("access-control-allow-headers", "content-type, x-verivann-token")
+            self.send_header("access-control-allow-methods", "GET, POST, OPTIONS")
+        self.send_header("vary", "Origin")
+        # Don't let another page frame the inbox (clickjacking), and no MIME sniffing.
+        self.send_header("x-frame-options", "DENY")
+        self.send_header("x-content-type-options", "nosniff")
+        self.send_header("referrer-policy", "no-referrer")
         self.end_headers()
         self.wfile.write(data)
 
@@ -481,21 +526,19 @@ class _Handler(BaseHTTPRequestHandler):
             return {}
 
     def _authorized(self) -> bool:
-        if not self.token:
-            return True
         given = self.headers.get("x-verivann-token", "")
         if not given and "token=" in self.path:
             given = self.path.split("token=", 1)[1].split("&", 1)[0]
-        return secrets.compare_digest(given, self.token)
+        return is_authorized(self.headers.get("origin", ""), given, self.token)
 
     def do_OPTIONS(self) -> None:  # noqa: N802 - CORS preflight from the extension
         self._send(204, b"", "text/plain")
 
     def do_GET(self) -> None:  # noqa: N802
+        # GET serves only the static shell (page, manifest, worker, icons, health).
+        # It carries no library data, so it needs no token; the API (POST) is gated.
         path = self.path.split("?", 1)[0]
         if path in ("/", "/index.html"):
-            if not self._authorized():
-                return self._send(401, "unauthorized — open the URL that `verivann serve --lan` printed", "text/plain")
             return self._send(200, PAGE)
         if path == "/manifest.webmanifest":
             return self._send(200, json.dumps(MANIFEST), "application/manifest+json")
@@ -707,16 +750,20 @@ def serve(
     token: str | None = None,
 ) -> None:
     exposed = host not in _LOOPBACK
-    # An intake endpoint reachable from the network must not be open to the network.
-    if exposed and not token:
-        token = secrets.token_urlsafe(9)
-    _Handler.token = token or ""
+    # A token is ALWAYS required — even on loopback. Any website the user visits can
+    # reach 127.0.0.1, so the token is what keeps a web page out of the library. The
+    # page picks it up from the URL we open; the browser extension is trusted by its
+    # origin and needs no token.
+    if not token:
+        token = secrets.token_urlsafe(12)
+    _Handler.token = token
 
     server = ThreadingHTTPServer((host, port), _Handler)
-    suffix = f"?token={token}" if token else ""
+    suffix = f"?token={token}"
     local = f"http://{'127.0.0.1' if exposed else host}:{port}/{suffix}"
 
     print(f"Verivann inbox -> {local}")
+    print("  (the token in that URL is required — open it, don't just type the address)")
     if exposed:
         print(f"  on your phone -> http://{_lan_ip()}:{port}/{suffix}")
         print("  (open it once, then 'Add to home screen' — Verivann joins the share sheet)")

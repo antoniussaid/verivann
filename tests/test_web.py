@@ -18,9 +18,48 @@ import subprocess
 
 import pytest
 
-from verivann.web import PAGE, SERVICE_WORKER
+from verivann.web import PAGE, SERVICE_WORKER, cors_origin, is_authorized
 
 _SCRIPT = re.search(r"<script>(.*?)</script>", PAGE, re.DOTALL).group(1)
+
+
+# ---------- the CSRF/CORS defense ----------
+
+_TOKEN = "s3cret-token"
+
+
+def test_a_website_cannot_reach_the_api_without_the_token():
+    """The core threat: any site the user visits could fetch() the local API."""
+    # evil.com, no token → rejected.
+    assert is_authorized("https://evil.example.com", "", _TOKEN) is False
+    # evil.com guessing a wrong token → rejected.
+    assert is_authorized("https://evil.example.com", "wrong", _TOKEN) is False
+    # the inbox page itself is same-origin and carries the token → allowed.
+    assert is_authorized("http://127.0.0.1:8130", _TOKEN, _TOKEN) is True
+
+
+def test_a_browser_extension_origin_is_trusted_without_a_token():
+    """A web page cannot forge a chrome-extension:// origin — the browser sets it."""
+    assert is_authorized("chrome-extension://abcdefg", "", _TOKEN) is True
+    assert is_authorized("moz-extension://abcdefg", "", _TOKEN) is True
+    assert is_authorized("safari-web-extension://x", "", _TOKEN) is True
+
+
+def test_cors_never_reflects_a_website_origin():
+    assert cors_origin("https://evil.example.com") is None
+    assert cors_origin("http://127.0.0.1:8130") is None  # not even our own page
+    assert cors_origin("chrome-extension://abcdefg") == "chrome-extension://abcdefg"
+    assert cors_origin("") is None
+
+
+def test_the_page_never_ships_a_wildcard_cors_header():
+    # a regression guard: the old code sent access-control-allow-origin: *
+    assert "access-control-allow-origin\", \"*\"" not in PAGE  # not in the page (belt)
+
+
+def test_a_correct_token_authorizes_any_client():
+    assert is_authorized("", _TOKEN, _TOKEN) is True           # curl / CLI, no origin
+    assert is_authorized("https://example.com", _TOKEN, _TOKEN) is True  # token beats origin
 
 
 def _check_js(source: str, tmp_path, name: str) -> None:
