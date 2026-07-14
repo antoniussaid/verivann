@@ -3,14 +3,14 @@
 Two things break identity in practice, and both showed up within an hour of real
 use:
 
-  * The same video arrives twice — once plain, once with `&t=78s` from a
-    timestamp link — and becomes two notes.
+  * The same video arrives twice - once plain, once with `&t=78s` from a
+    timestamp link - and becomes two notes.
   * A link copied out of Markdown arrives as `(https://…)`, so the "URL" carries
     a bracket and the note gets a garbage title.
 
 So before anything is fetched or stored, a submitted string is cleaned and the
 URL is canonicalized: tracking noise dropped, share forms normalized, position
-markers removed. What is left is the source's identity — which is what dedup,
+markers removed. What is left is the source's identity - which is what dedup,
 the library, and the keep/drop verdicts all key on.
 
 Deliberately conservative: only *known* junk is stripped. An unknown query

@@ -1,4 +1,4 @@
-"""Reddit adapter — post + top comments via the public JSON endpoint.
+"""Reddit adapter - post + top comments via the public JSON endpoint.
 
 Reddit is a JS app; its raw HTML carries little content. Appending `.json` to a
 post URL returns the post and its comment tree (public, read-only, no auth, no
@@ -72,6 +72,6 @@ def extract_reddit(url: str) -> Extracted:
 def _fallback(url: str, error: str) -> Extracted:
     return Extracted(
         title=url,
-        text=f"[Reddit extraction failed — process manually]\nURL: {url}\nReason: {error}",
+        text=f"[Reddit extraction failed - process manually]\nURL: {url}\nReason: {error}",
         meta={"url": url, "error": error, "fallback": True},
     )

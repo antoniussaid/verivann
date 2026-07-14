@@ -4,7 +4,7 @@ from verivann.schema import Extracted
 
 
 class _Page:
-    """A page that can be edited between reads — like a real one."""
+    """A page that can be edited between reads - like a real one."""
 
     def __init__(self, text):
         self.text = text

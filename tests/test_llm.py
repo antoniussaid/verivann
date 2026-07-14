@@ -84,7 +84,7 @@ def test_parse_tolerates_a_trailing_comma():
 
 
 def test_parse_tolerates_trailing_comma_with_json_null():
-    # json.loads fails (comma) and ast.literal_eval fails (null) — the repair pass wins.
+    # json.loads fails (comma) and ast.literal_eval fails (null) - the repair pass wins.
     data = _parse_json('{"domain":"research","summary":null,"action":"note",}')
     assert data["action"] == "note" and data["summary"] is None
 

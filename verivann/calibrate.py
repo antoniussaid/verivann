@@ -1,6 +1,6 @@
 """The router, measured against the only truth there is: yours.
 
-We keep a permanent record of every source — right, wrong, manipulative. And we
+We keep a permanent record of every source - right, wrong, manipulative. And we
 have never once asked the same question about **ourselves**, although the answer
 is sitting in the same database: the analyzer makes a prediction on every intake
 (a domain, an action, a confidence), and your keep/drop verdicts say whether it
@@ -10,10 +10,10 @@ was any good.
 
   keeper precision   of the notes it proposed as note/task, how many did you keep?
   drop precision     of those it proposed dropping, how many did you drop?
-  by confidence      in the 0.8–1.0 bucket, what share survived? A model whose 0.9s
+  by confidence      in the 0.8-1.0 bucket, what share survived? A model whose 0.9s
                      survive at 30 % is not confident, it is loud.
   by engine / lens   heuristic vs llm:<model>; critique vs digest. Which reads YOUR
-                     material better — measured, not assumed.
+                     material better - measured, not assumed.
 
 Two honesty rules, both load-bearing:
 
@@ -45,7 +45,7 @@ class Bucket:
         return round(self.kept / self.n, 2) if self.n else None
 
     def label(self) -> str:
-        return f"{self.low:.1f}–{min(self.high, 1.0):.1f}"
+        return f"{self.low:.1f}-{min(self.high, 1.0):.1f}"
 
 
 @dataclass
@@ -100,14 +100,14 @@ class Report:
     def headline(self) -> str:
         if not self.enough:
             return (
-                f"Only {self.judged} judged note(s) — not enough to measure the router. "
+                f"Only {self.judged} judged note(s) - not enough to measure the router. "
                 f"({MIN_JUDGED} needed; a precision on five samples is a horoscope.)"
             )
         parts = [f"The router agreed with you {int((self.accuracy or 0) * 100)}% of the time"]
         if self.keeper_precision is not None and self.keeper_precision < 0.5:
             parts.append(
                 f"it proposed keeping {self.keeper_proposed} note(s) and you kept "
-                f"{self.keeper_kept} — it over-proposes"
+                f"{self.keeper_kept} - it over-proposes"
             )
         if self.calibrated() is False:
             parts.append("and its confidence is NOT calibrated: being surer did not make it righter")

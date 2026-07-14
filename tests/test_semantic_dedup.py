@@ -1,4 +1,4 @@
-"""PC-4 — the one guard that protects the credibility metric.
+"""PC-4 - the one guard that protects the credibility metric.
 
 Near-identical content re-posted under different URLs would otherwise inflate a
 source's apparent corroboration. Same-source reposts merge; cross-source echoes are

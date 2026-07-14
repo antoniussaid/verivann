@@ -4,11 +4,11 @@ Three sources nobody routes, and everybody has:
 
   screenshots   Hundreds of them. You took each one because it mattered for four
                 seconds, and you will never open the folder again. OCR + routing
-                turns them into something searchable — this is the cheapest,
+                turns them into something searchable - this is the cheapest,
                 largest pile of forgotten value on any device.
   voice memos   The fastest path from a thought to a note: say it, Whisper writes
                 it, the router routes it.
-  documents     PDFs and EPUBs — papers, books, contracts, invoices.
+  documents     PDFs and EPUBs - papers, books, contracts, invoices.
 
 All local, all optional, all degrading cleanly: no tesseract → no OCR; no Whisper
 → no transcript; no PDF reader → a note that says so, rather than nothing.
@@ -55,13 +55,13 @@ def extract_image(path: Path) -> Extracted:
     if not ocr_available():
         return Extracted(
             title=path.stem,
-            text=f"[Image — no OCR available. Install tesseract to read it.]\nFile: {path}",
+            text=f"[Image - no OCR available. Install tesseract to read it.]\nFile: {path}",
             meta={"file": str(path), "kind": "image", "ocr": False},
         )
     text = (ocr_image(path) or "").strip()
     return Extracted(
         title=_title_from_text(text) or path.stem,
-        text=text or f"[Image — no readable text found]\nFile: {path}",
+        text=text or f"[Image - no readable text found]\nFile: {path}",
         meta={"file": str(path), "kind": "image", "ocr": True, "chars": len(text)},
     )
 
@@ -74,14 +74,14 @@ def extract_audio(path: Path) -> Extracted:
     if not enabled():
         return Extracted(
             title=path.stem,
-            text=f"[Audio — transcription is off. Set VERIVANN_WHISPER_MODEL to read it.]\nFile: {path}",
+            text=f"[Audio - transcription is off. Set VERIVANN_WHISPER_MODEL to read it.]\nFile: {path}",
             meta={"file": str(path), "kind": "audio", "has_transcript": False},
         )
     text, lang = transcribe_file(path)
     text = (text or "").strip()
     return Extracted(
         title=_title_from_text(text) or path.stem,
-        text=text or f"[Audio — nothing transcribed]\nFile: {path}",
+        text=text or f"[Audio - nothing transcribed]\nFile: {path}",
         meta={
             "file": str(path), "kind": "audio",
             "transcript": lang, "transcript_source": "whisper",
@@ -99,7 +99,7 @@ def extract_pdf(path: Path) -> Extracted:
         return Extracted(
             title=path.stem,
             text=(
-                "[PDF — no reader available. Install poppler (pdftotext) or "
+                "[PDF - no reader available. Install poppler (pdftotext) or "
                 f"`pip install pypdf` to read it.]\nFile: {path}"
             ),
             meta={"file": str(path), "kind": "pdf", "read": False},
@@ -146,7 +146,7 @@ def extract_epub(path: Path) -> Extracted:
     except ImportError:
         return Extracted(
             title=path.stem,
-            text=f"[EPUB — needs beautifulsoup4 to read.]\nFile: {path}",
+            text=f"[EPUB - needs beautifulsoup4 to read.]\nFile: {path}",
             meta={"file": str(path), "kind": "epub", "read": False},
         )
     chunks: list[str] = []
@@ -162,7 +162,7 @@ def extract_epub(path: Path) -> Extracted:
     except (zipfile.BadZipFile, OSError):
         return Extracted(
             title=path.stem,
-            text=f"[EPUB — unreadable file]\nFile: {path}",
+            text=f"[EPUB - unreadable file]\nFile: {path}",
             meta={"file": str(path), "kind": "epub", "read": False},
         )
     text = "\n".join(c for c in chunks if c)
@@ -174,7 +174,7 @@ def extract_epub(path: Path) -> Extracted:
 
 
 def _title_from_text(text: str) -> str:
-    """The first real line — a screenshot's headline, a memo's first sentence."""
+    """The first real line - a screenshot's headline, a memo's first sentence."""
     for line in (text or "").splitlines():
         line = re.sub(r"\s+", " ", line).strip()
         if len(line) >= 12:

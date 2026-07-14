@@ -8,10 +8,10 @@ build/
 dist/
 .pytest_cache/
 
-# Local data — NEVER commit staged intakes or archives (may contain private data)
+# Local data - NEVER commit staged intakes or archives (may contain private data)
 data/
 
-# Secrets & private config — the private layer's real domains/paths live here
+# Secrets & private config - the private layer's real domains/paths live here
 .env
 .env.*
 !.env.example
@@ -25,7 +25,7 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Internal working/portfolio docs — kept locally, not published
+# Internal working/portfolio docs - kept locally, not published
 ANALYSIS_FRAMEWORK.md
 PLAN.md
 PLAN2.md

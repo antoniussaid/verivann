@@ -10,7 +10,7 @@ what got through**. The rest is staged, counted, and left alone.
     verivann feed list                 → the pass rate of every feed you follow
 
 The pass rate is the interesting number. A feed that produces 40 items a week and
-passes none of them is not a feed you follow — it is a habit, and now you can see it.
+passes none of them is not a feed you follow - it is a habit, and now you can see it.
 
 RSS and Atom, parsed with the standard library. No feedparser, no dependency.
 """
@@ -24,7 +24,7 @@ from xml.etree import ElementTree
 from .config import Config
 
 _UA = "Mozilla/5.0 (compatible; verivann/0.1; +https://antonius.app)"
-_MAX_ITEMS = 25  # per feed per run — a bound, not a preference
+_MAX_ITEMS = 25  # per feed per run - a bound, not a preference
 
 
 @dataclass
@@ -61,7 +61,7 @@ class Result:
 
 
 def fetch(url: str) -> tuple[str, list[Item]]:
-    """(feed title, items). RSS or Atom — both are just XML with different names."""
+    """(feed title, items). RSS or Atom - both are just XML with different names."""
     from .net import safe_get  # SSRF guard: a feed URL is user-supplied too
 
     resp = safe_get(url, headers={"user-agent": _UA}, timeout=25.0)
@@ -70,7 +70,7 @@ def fetch(url: str) -> tuple[str, list[Item]]:
 
     title = _text(root, ".//{*}channel/{*}title") or _text(root, "./{*}title") or url
     items: list[Item] = []
-    # ElementTree's `{*}` wildcard works in find(), not in iter() — so match the
+    # ElementTree's `{*}` wildcard works in find(), not in iter() - so match the
     # local name ourselves and stay namespace-agnostic (RSS and Atom both work).
     for node in root.iter():
         if _local(node.tag) not in ("item", "entry"):
@@ -161,7 +161,7 @@ def run(config: Config | None = None, lens: str | None = None) -> list[Result]:
 
 
 def _gets_through(result, mode: str, profile) -> bool:
-    """The editorial decision — and an honest account of what it is based on.
+    """The editorial decision - and an honest account of what it is based on.
 
     There are three regimes, and conflating them is how a filter becomes a lie:
 

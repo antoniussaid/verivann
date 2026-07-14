@@ -77,7 +77,7 @@ def test_a_hundred_shrugs_do_not_outshout_one_verdict(tmp_path):
     profile = load_profile(tmp_path)
     assert profile.n_dropped == 10
     assert profile.evidence == 2.5
-    assert profile.active is False  # still below MIN_SIGNAL (3.0) — correctly silent
+    assert profile.active is False  # still below MIN_SIGNAL (3.0) - correctly silent
 
     _old_note("real", "Explicitly dropped", tmp_path, days_ago=1)
     record_feedback("real", "dropped", tmp_path)

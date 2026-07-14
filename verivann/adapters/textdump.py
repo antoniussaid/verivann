@@ -1,4 +1,4 @@
-"""Textdump adapter — accept arbitrary pasted text.
+"""Textdump adapter - accept arbitrary pasted text.
 
 The simplest, most robust intake: no network, no platform. Always available,
 so the system is useful even when a platform can't be extracted.

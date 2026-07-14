@@ -30,7 +30,7 @@ class _Resp:
 
 
 def _staged(note_id, title, text, tmp_path, days_ago=0, source_key="web:example.com"):
-    """A note that exists both on disk and in the index — like a real one."""
+    """A note that exists both on disk and in the index - like a real one."""
     created = (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat()
     notes = tmp_path / "notes"
     notes.mkdir(parents=True, exist_ok=True)

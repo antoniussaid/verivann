@@ -1,4 +1,4 @@
-"""The setup wizard's I/O-free core — the part that must never mangle a config."""
+"""The setup wizard's I/O-free core - the part that must never mangle a config."""
 
 import httpx
 
@@ -39,7 +39,7 @@ def test_cloudflare_carries_the_account_id():
 
 def test_a_local_provider_fills_both_slots_and_sets_strict_privacy():
     env = compose_env("ollama", model="llama3.2:3b")
-    # Main slot reads public material; local slot reads sensitive material — both are
+    # Main slot reads public material; local slot reads sensitive material - both are
     # the same local model, so nothing ever leaves the machine either way.
     assert env["VERIVANN_LLM"] == "ollama"
     assert env["VERIVANN_LLM_MODEL"] == "llama3.2:3b"

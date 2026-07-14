@@ -1,4 +1,4 @@
-"""The inbox — and the capture surface.
+"""The inbox - and the capture surface.
 
 No framework: stdlib http.server only.
 
@@ -9,13 +9,13 @@ No framework: stdlib http.server only.
 Capture friction is the thing that kills tools like this: nobody opens a terminal
 to save a video. So the same server is also:
 
-  * a share target — install it as an app on the phone (`verivann serve --lan`) and
+  * a share target - install it as an app on the phone (`verivann serve --lan`) and
     Verivann appears in the system share sheet;
   * an endpoint for the browser extension (extensions/chrome) and the bookmarklet,
     both of which just hand it a URL.
 
 Local-first: binds to 127.0.0.1 by default. `--lan` opens it to your own network
-and then REQUIRES a token — an open intake endpoint on a shared network would let
+and then REQUIRES a token - an open intake endpoint on a shared network would let
 anyone put material into your library.
 """
 
@@ -39,7 +39,7 @@ from .render import render_markdown
 _LOOPBACK = ("127.0.0.1", "localhost", "::1")
 
 _LENS_OPTIONS = "".join(
-    f'<option value="{name}"{" selected" if name == DEFAULT_LENS else ""}>{name} — {desc}</option>'
+    f'<option value="{name}"{" selected" if name == DEFAULT_LENS else ""}>{name} - {desc}</option>'
     for name, desc in describe()
 )
 
@@ -56,7 +56,7 @@ MANIFEST = {
         {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
         {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
     ],
-    # The share sheet hands us title/text/url as query params — no service-worker
+    # The share sheet hands us title/text/url as query params - no service-worker
     # POST plumbing needed; the page picks them up on load and digests them.
     "share_target": {
         "action": "./",
@@ -199,7 +199,7 @@ PAGE = """<!doctype html>
       <pre id="rbody"></pre>
       <div class="row">
         <button class="go" id="mark" disabled>Highlight selection</button>
-        <span class="hint">A highlight is the strongest thing you can say about a source — the router counts it.</span>
+        <span class="hint">A highlight is the strongest thing you can say about a source - the router counts it.</span>
       </div>
     </div>
   </section>
@@ -242,7 +242,7 @@ PAGE = """<!doctype html>
     if (t.dataset.panel === 'mirror') loadMirror();
   }));
 
-  // A first guess only — the server cleans the value and decides for real.
+  // A first guess only - the server cleans the value and decides for real.
   function detectKind(s) {
     s = s.trim().replace(/^[("'`\\[<]+/, '');
     if (/^https?:\\/\\//i.test(s) && !/\\n/.test(s)) {
@@ -314,7 +314,7 @@ PAGE = """<!doctype html>
       el.addEventListener('click', () => openNote(el.dataset.id)));
   }
 
-  // The reader. Clicking a hit is itself a signal — you searched, and you chose this one.
+  // The reader. Clicking a hit is itself a signal - you searched, and you chose this one.
   let readingId = null;
 
   async function openNote(id) {
@@ -331,7 +331,7 @@ PAGE = """<!doctype html>
 
   // NOTE: this page is a Python string. Every backslash meant for the BROWSER must
   // be doubled in the Python source, or Python eats it and splits the JS literal in
-  // half — which is exactly how this whole script once died, in silence.
+  // half - which is exactly how this whole script once died, in silence.
   function renderHighlights(list) {
     if (!list.length) { $('rhl').style.display = 'none'; return; }
     $('rhl').style.display = 'block';
@@ -378,7 +378,7 @@ PAGE = """<!doctype html>
   $('btn-search').addEventListener('click', () => query('/search', $('btn-search')));
   $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') query('/ask', $('btn-ask')); });
 
-  // The mirror: hours in, notes kept, where the time went — and your open questions.
+  // The mirror: hours in, notes kept, where the time went - and your open questions.
   async function loadMirror() {
     try {
       const d = await post('/mirror', {});
@@ -403,7 +403,7 @@ PAGE = """<!doctype html>
     $('questions').innerHTML = list.length ? list.map((q) =>
       '<div class="hit"><div class="t">[' + q.id + '] ' + esc(q.text) + '</div>' +
       '<div class="m">' + q.evidence + ' advancing · ' + q.against + ' contradicting</div></div>'
-    ).join('') : '<div class="hit"><div class="m">(no open questions — material is routed to folders, ' +
+    ).join('') : '<div class="hit"><div class="m">(no open questions - material is routed to folders, ' +
       'which tells you where a thing went, never why it mattered)</div></div>';
   }
 
@@ -427,14 +427,14 @@ PAGE = """<!doctype html>
   // Shared in from the phone, the extension, or the bookmarklet: pre-fill and wait for
   // one click. We do NOT auto-digest: a cross-site link to /?u=… is indistinguishable
   // from a genuine share, so auto-firing would let any website drive this page (which
-  // holds the token) into fetching a URL and staging a note — a confused-deputy. One
+  // holds the token) into fetching a URL and staging a note - a confused-deputy. One
   // deliberate press closes that, and the shared value is already in the box, ready.
   const shared = (params.get('u') || params.get('text') || '').trim();
   if (shared) {
     $('v').value = shared;
     if (params.get('lens')) $('lens').value = params.get('lens');
     history.replaceState({}, '', here);  // don't leave the URL (or token) in the bar
-    $('go').focus();  // Enter or click digests — a conscious commit, not a drive-by
+    $('go').focus();  // Enter or click digests - a conscious commit, not a drive-by
   }
 </script>
 </body>
@@ -461,13 +461,13 @@ def _kind_of(value: str, claimed: str) -> str:
 #
 # The inbox is an HTTP API on localhost. Without a guard, ANY website the user
 # visits could `fetch()` /ask (to read the whole library) or /intake (to poison
-# it) — a classic cross-site attack against a local server. So every API call must
+# it) - a classic cross-site attack against a local server. So every API call must
 # prove one of two things:
 #
 #   * it carries the session token (the page has it from the URL; a CLI/curl user
-#     passes it) — a website cannot know it; or
+#     passes it) - a website cannot know it; or
 #   * it comes from a browser-extension origin (chrome-extension://…), which the
-#     browser sets and a web page CANNOT forge — so our own extension works
+#     browser sets and a web page CANNOT forge - so our own extension works
 #     zero-config while websites stay locked out.
 #
 # CORS is never `*`: only extension origins are reflected, so even a "simple"
@@ -489,7 +489,7 @@ def is_authorized(origin: str, given_token: str, configured_token: str) -> bool:
 
 
 def cors_origin(origin: str) -> str | None:
-    """The only origins we ever reflect — never a wildcard."""
+    """The only origins we ever reflect - never a wildcard."""
     return origin if _is_extension_origin(origin) else None
 
 
@@ -754,7 +754,7 @@ def serve(
     token: str | None = None,
 ) -> None:
     exposed = host not in _LOOPBACK
-    # A token is ALWAYS required — even on loopback. Any website the user visits can
+    # A token is ALWAYS required - even on loopback. Any website the user visits can
     # reach 127.0.0.1, so the token is what keeps a web page out of the library. The
     # page picks it up from the URL we open; the browser extension is trusted by its
     # origin and needs no token.
@@ -767,10 +767,10 @@ def serve(
     local = f"http://{'127.0.0.1' if exposed else host}:{port}/{suffix}"
 
     print(f"Verivann inbox -> {local}")
-    print("  (the token in that URL is required — open it, don't just type the address)")
+    print("  (the token in that URL is required - open it, don't just type the address)")
     if exposed:
         print(f"  on your phone -> http://{_lan_ip()}:{port}/{suffix}")
-        print("  (open it once, then 'Add to home screen' — Verivann joins the share sheet)")
+        print("  (open it once, then 'Add to home screen' - Verivann joins the share sheet)")
     print("  Ctrl+C to stop")
 
     if open_browser:

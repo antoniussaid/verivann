@@ -1,4 +1,4 @@
-"""Bring in what you already have — and judge it.
+"""Bring in what you already have - and judge it.
 
 Verivann had no migration path at all, which is an adoption blocker and a wasted
 opportunity at the same time. The best possible first day with a tool like this is
@@ -12,13 +12,13 @@ never came true.
     verivann import history              the pages you actually came back to
 
 Everything is bounded (`--limit`), resumable (the same source is never digested
-twice — canonical identity, see canonical.py), and reversible in the only sense
+twice - canonical identity, see canonical.py), and reversible in the only sense
 that matters: **nothing you import is modified.** Your vault, your export file and
 your browser stay exactly as they were.
 
 Browser history deserves a note: a page you visited five times is a page that
 mattered to you, and that is a relevance signal no bookmark can give. We read the
-history file — a copy of it, because the browser holds a lock — and never write to it.
+history file - a copy of it, because the browser holds a lock - and never write to it.
 """
 
 from __future__ import annotations
@@ -101,7 +101,7 @@ def from_history(days: int = 60, min_visits: int = 2, browser_db: Path | None = 
     if source is None or not source.is_file():
         return []
 
-    # The browser holds a lock on its own history — work on a copy, and never write.
+    # The browser holds a lock on its own history - work on a copy, and never write.
     with tempfile.TemporaryDirectory() as tmp:
         copy = Path(tmp) / "history.db"
         try:

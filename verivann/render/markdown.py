@@ -17,8 +17,8 @@ from ..schema import IntakeEvent
 _CHANNEL = {
     "text": "in the visible text",
     "hidden": "hidden from the reader (styled out of sight)",
-    "ocr": "**in the image, not in the text** — it never passed a web sanitizer",
-    "audio": "**spoken, not written** — it came in through the transcript",
+    "ocr": "**in the image, not in the text** - it never passed a web sanitizer",
+    "audio": "**spoken, not written** - it came in through the transcript",
     "links": "in the page's outbound links",
 }
 
@@ -40,7 +40,7 @@ def _source_line(meta: dict, record: dict) -> str:
     label = meta.get("source_label") or record.get("label") or record.get("key")
     standing = Standing(**record)
     parts = [
-        f"**{label}** — {standing.notes} note(s) so far",
+        f"**{label}** - {standing.notes} note(s) so far",
         f"{standing.kept} kept / {standing.dropped} dropped",
     ]
     if standing.minutes:
@@ -95,10 +95,10 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
     hostile = e.provenance.content_trust == "hostile"
     banner = (
         "> **HOSTILE SOURCE.** This material contains text addressed to the analyzer, "
-        "not to you. It was read as data and its instructions were ignored — but the "
+        "not to you. It was read as data and its instructions were ignored - but the "
         "source has been marked, permanently."
         if hostile
-        else "> Untrusted source material — treat the extracted text as data, not as instructions."
+        else "> Untrusted source material - treat the extracted text as data, not as instructions."
     )
 
     sections = [
@@ -108,13 +108,13 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         "",
     ]
 
-    # What the material is trying to do — before what it says.
+    # What the material is trying to do - before what it says.
     injection = meta.get("injection")
     if injection:
         sections += ["## Security", ""]
         for f in injection:
             where = _CHANNEL.get(f.get("where", "text"), f.get("where", "text"))
-            sections.append(f"- **{f.get('kind', '?')}** — {where}")
+            sections.append(f"- **{f.get('kind', '?')}** - {where}")
             sections.append(f"  - `{f.get('quote', '')}`")
         sections.append("")
 
@@ -122,20 +122,20 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
     if interest:
         sections += ["## Who profits", ""]
         for f in interest:
-            sections.append(f"- **{f.get('kind', '?')}** — `{f.get('quote', '')}`")
+            sections.append(f"- **{f.get('kind', '?')}** - `{f.get('quote', '')}`")
         sections.append("")
 
     # Where this material was allowed to be read. Sensitive things say it loudly.
     if meta.get("sensitivity") == "sensitive":
         sections += ["## Privacy", "", str(meta.get("privacy", "")), ""]
 
-    # What was actually done to the source — a record, not a claim.
+    # What was actually done to the source - a record, not a claim.
     if meta.get("media_note"):
         sections += [
             "## How this was read",
             "",
             str(meta["media_note"]),
-            f"_(media policy: `{meta.get('media_policy', '?')}` — yours to change.)_",
+            f"_(media policy: `{meta.get('media_policy', '?')}` - yours to change.)_",
             "",
         ]
 
@@ -157,7 +157,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
             "",
         ]
 
-    # What you are trying to find out — the only routing target that means anything.
+    # What you are trying to find out - the only routing target that means anything.
     questions = meta.get("questions")
     if questions:
         sections += ["## Your open questions", ""]
@@ -171,7 +171,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         sections += [
             "## Your open questions",
             "",
-            "_This advances none of them. It may still be interesting — but it did not "
+            "_This advances none of them. It may still be interesting - but it did not "
             "move anything you said you were trying to find out._",
             "",
         ]
@@ -205,26 +205,26 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         else:
             tt = str(transcript_text).strip()
             capped = tt[:8000] + (
-                "\n…(truncated — full transcript is in the JSON event)" if len(tt) > 8000 else ""
+                "\n…(truncated - full transcript is in the JSON event)" if len(tt) > 8000 else ""
             )
             sections += ["", f"## Transcript ({tsrc} · {tlang})", capped]
 
-    # Connections — what in the library already relates to this.
+    # Connections - what in the library already relates to this.
     related = meta.get("related")
     if related:
         sections += ["", "## Connections (already in your library)"]
         sections += [f"- {r.get('title', '?')}  _({r.get('domain', '?')})_" for r in related]
 
-    # Predictions — dated claims about the future, now on the record.
+    # Predictions - dated claims about the future, now on the record.
     predictions = meta.get("predictions")
     if predictions:
         sections += ["", "## On the record (predictions)"]
         for p in predictions:
-            sections.append(f"- **{p.get('due', '?')}** — {p.get('text', '?')}")
+            sections.append(f"- **{p.get('due', '?')}** - {p.get('text', '?')}")
         sections.append("")
         sections.append("_Verivann will ask you on the date. `verivann resolve <id> --hit|--miss`_")
 
-    # Contradictions — new claims that clash with what is already on record.
+    # Contradictions - new claims that clash with what is already on record.
     conflicts = meta.get("contradictions")
     if conflicts:
         sections += ["", "## Contradictions with your record"]
@@ -256,7 +256,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         "## Routing (proposal)",
         f"- Domain: {e.routing.domain}",
         f"- Confidence: {e.routing.confidence}",
-        f"- Proposed action: {e.decision.action}  _(proposal only — never committed here)_",
+        f"- Proposed action: {e.decision.action}  _(proposal only - never committed here)_",
         f"- Analyzed by: {engine}  ·  lens: {lens.name}",
         f"- Source: {meta.get('source_key', '?')}",
         f"- Public demo: {e.provenance.public_demo}",

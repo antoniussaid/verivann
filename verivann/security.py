@@ -1,6 +1,6 @@
 """What the material is trying to do to you.
 
-Every note Verivann writes says `content_trust: unverified` — web material is data,
+Every note Verivann writes says `content_trust: unverified` - web material is data,
 never instruction. That is a *policy*. This module makes it *auditable*: it looks
 for material that is actively trying to steer the analyzer, and for material that
 is trying to steer you.
@@ -15,7 +15,7 @@ Two scans, both cheap, both offline:
                judgment Verivann makes without asking a model.
 
   interest     who paid for this: sponsorships, affiliate codes, referral params,
-               "link in bio". Rendered ABOVE the summary — you learn who profits
+               "link in bio". Rendered ABOVE the summary - you learn who profits
                before you learn what they claim.
 
 Neither scan blocks anything. It reports. The pipeline is the same either way; the
@@ -46,13 +46,13 @@ _INJECTION_PATTERNS: list[tuple[str, str]] = [
     (r"\b(api[_ -]?key|password|secret|token)\b.{0,30}\b(send|reveal|include|output)", "exfiltration attempt"),
 ]
 
-# Zero-width and directional characters. NOT the soft hyphen (U+00AD) — that is
+# Zero-width and directional characters. NOT the soft hyphen (U+00AD) - that is
 # ordinary typography, and treating it as an attack was how this scan first learned
 # to cry wolf.
 _INVISIBLE = re.compile(r"[​-‏⁠-⁤﻿]")
 
 # The Unicode TAG block: invisible characters that carry a full ASCII payload. This
-# is the currently fashionable way to hide an instruction in plain text — a human
+# is the currently fashionable way to hide an instruction in plain text - a human
 # sees nothing, the model reads a sentence. There is no innocent use of it.
 _TAG_BLOCK = re.compile(r"[\U000E0000-\U000E007F]+")
 
@@ -99,8 +99,8 @@ def scan_injection(
 
       text        the page as a human reads it
       hidden      styled out of sight (white-on-white, display:none, off-screen)
-      ocr         text extracted from an IMAGE — it never passed a web sanitizer,
-      audio       text extracted from SPEECH — nor did this one.
+      ocr         text extracted from an IMAGE - it never passed a web sanitizer,
+      audio       text extracted from SPEECH - nor did this one.
       links       the page's outbound URLs
 
     A poster in a video and a sentence in a podcast can both carry an instruction,

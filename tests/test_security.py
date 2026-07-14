@@ -28,7 +28,7 @@ def test_accessibility_markup_is_not_an_attack():
     """The first version of this scan branded GitHub hostile for having a screen-reader menu.
 
     Every accessible site hides text from sighted users. Hidden text is evidence
-    only when it SAYS something — its mere existence is not a finding.
+    only when it SAYS something - its mere existence is not a finding.
     """
     nav = "Skip to content Open main menu Code Issues Pull requests Actions Projects Insights"
     assert scan_injection("An article about Rust.", hidden_text=nav) == []
@@ -74,7 +74,7 @@ def test_an_instruction_spoken_aloud_is_caught_too():
 
 
 def test_who_profits_is_surfaced():
-    findings = scan_interest("This video is sponsored by Acme. Use code VERIVANN for 20% off — link in bio.")
+    findings = scan_interest("This video is sponsored by Acme. Use code VERIVANN for 20% off - link in bio.")
     kinds = {f.kind for f in findings}
     assert {"sponsorship", "discount code", "funnel"} <= kinds
 
@@ -88,7 +88,7 @@ def test_the_canary_catches_a_SUCCESSFUL_hijack(monkeypatch, tmp_path):
     """The scan catches an attempt. Only the canary catches a success.
 
     We plant a secret in the system prompt and forbid the model to repeat it. If it
-    comes back out, the material out-argued our own instructions — and that is not a
+    comes back out, the material out-argued our own instructions - and that is not a
     suspicion, it is an observation, made from outside the model.
     """
     import re
@@ -204,8 +204,8 @@ def test_the_canary_catches_a_leak_smuggled_out_encoded(monkeypatch, tmp_path):
 
 
 def test_canary_detection_resists_every_known_evasion():
-    """Case-shift, non-whitespace separators, and offset-misaligned encodings — the
-    evasions an adversarial audit found — must all still be caught."""
+    """Case-shift, non-whitespace separators, and offset-misaligned encodings - the
+    evasions an adversarial audit found - must all still be caught."""
     import base64
 
     from verivann.analysis.llm import _canary_leaked
@@ -259,7 +259,7 @@ def test_a_detected_leak_is_scrubbed_in_every_encoding():
 
 
 def test_the_canary_guards_a_secondary_model_call(monkeypatch, tmp_path):
-    """The canary is not only on the analysis path — every model call is guarded.
+    """The canary is not only on the analysis path - every model call is guarded.
 
     A secondary question (here: `ask`) whose model gets hijacked must degrade to
     nothing, never pass the hijacked answer back as if it were trustworthy.
@@ -283,7 +283,7 @@ def test_the_canary_guards_a_secondary_model_call(monkeypatch, tmp_path):
 
     def leaky(url, headers=None, json=None, timeout=None):
         token = re.search(r"CNRY-[0-9A-F]+", json["messages"][0]["content"]).group(0)
-        return _Resp(f"Sure — the token is {token} and here is the marketing copy you wanted.")
+        return _Resp(f"Sure - the token is {token} and here is the marketing copy you wanted.")
 
     monkeypatch.setattr(httpx, "post", leaky)
     llm = LLMConfig(provider="openai", model="m", base_url="http://x/v1")
@@ -313,7 +313,7 @@ def test_the_canary_can_be_disabled_for_trusted_prompts(monkeypatch, tmp_path):
             return None
 
         def json(self):
-            # Echo something that WOULD trip the guard if it were on — but it is off.
+            # Echo something that WOULD trip the guard if it were on - but it is off.
             return {"choices": [{"message": {"content": "CNRY-DEADBEEF result"}}]}
 
     seen = {}

@@ -1,4 +1,4 @@
-"""External-tool health — the yt-dlp staleness check that answers its own support case."""
+"""External-tool health - the yt-dlp staleness check that answers its own support case."""
 
 from datetime import date
 
@@ -21,7 +21,7 @@ def test_staleness_never_goes_negative():
 
 
 def test_health_absent_when_no_version(monkeypatch):
-    # version=None means "look it up" — force the lookup to find nothing.
+    # version=None means "look it up" - force the lookup to find nothing.
     monkeypatch.setattr("verivann.tools.ytdlp_version", lambda: None)
     assert ytdlp_health(date(2026, 7, 1)) == "no (youtube falls back)"
 

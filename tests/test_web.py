@@ -2,7 +2,7 @@
 
 That is a trap, and it sprang: a `\\n` written for the browser was eaten by Python,
 which split a JS string literal across two lines. The result was a SyntaxError that
-killed the *entire* script — so not one button on the page worked, and nothing said
+killed the *entire* script - so not one button on the page worked, and nothing said
 so. The page rendered perfectly and did nothing.
 
 So the script is now actually parsed, by an actual JavaScript engine, in CI. If
@@ -39,7 +39,7 @@ def test_a_website_cannot_reach_the_api_without_the_token():
 
 
 def test_a_browser_extension_origin_is_trusted_without_a_token():
-    """A web page cannot forge a chrome-extension:// origin — the browser sets it."""
+    """A web page cannot forge a chrome-extension:// origin - the browser sets it."""
     assert is_authorized("chrome-extension://abcdefg", "", _TOKEN) is True
     assert is_authorized("moz-extension://abcdefg", "", _TOKEN) is True
     assert is_authorized("safari-web-extension://x", "", _TOKEN) is True
@@ -65,7 +65,7 @@ def test_a_correct_token_authorizes_any_client():
 def _check_js(source: str, tmp_path, name: str) -> None:
     node = shutil.which("node")
     if node is None:
-        pytest.skip("node not installed — cannot parse the page's JavaScript")
+        pytest.skip("node not installed - cannot parse the page's JavaScript")
     path = tmp_path / name
     path.write_text(source, encoding="utf-8")
     proc = subprocess.run([node, "--check", str(path)], capture_output=True, text=True, timeout=30)

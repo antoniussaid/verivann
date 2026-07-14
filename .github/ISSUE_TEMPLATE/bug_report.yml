@@ -8,7 +8,7 @@ body:
         Thanks for reporting. Verivann runs on your machine, so the diagnostics below are
         what let it be fixed without me being able to see your setup.
 
-        **Security issue?** Don't file it here — use the Security tab → *Report a
+        **Security issue?** Don't file it here - use the Security tab → *Report a
         vulnerability* instead (see SECURITY.md).
   - type: textarea
     id: what-happened
@@ -33,7 +33,7 @@ body:
     attributes:
       label: Output of `vv doctor`
       description: >
-        Paste the full output. This answers half of every bug report — Python version,
+        Paste the full output. This answers half of every bug report - Python version,
         which optional tools are present, whether a model is configured, and (often the
         culprit) whether yt-dlp is stale. Redact anything you consider private.
       render: text

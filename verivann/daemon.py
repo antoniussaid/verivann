@@ -5,7 +5,7 @@ Three of the best things this tool does are, in practice, dead features: `feed r
 editor you have to wake up every morning is not an editor.
 
     verivann daemon              run the schedule, forever (Ctrl+C to stop)
-    verivann daemon --once       do one pass and exit — this is what a cron/Task
+    verivann daemon --once       do one pass and exit - this is what a cron/Task
                               Scheduler entry should call
     verivann daemon --install    print the exact command for your OS's scheduler
 
@@ -59,7 +59,7 @@ def _feeds(config: Config) -> str:
         return "nothing new"
     trained = results[0].trained if results else False
     basis = "your filter" if trained else "no filter yet (untrained)"
-    return f"{seen} item(s) read, {passed} got through — {basis}"
+    return f"{seen} item(s) read, {passed} got through - {basis}"
 
 
 def _watch(config: Config) -> str:
@@ -95,7 +95,7 @@ def schedule() -> list[Job]:
 
 
 def due(config: Config, now: float | None = None) -> list[Job]:
-    """Which jobs are due — persisted, so `--once` from cron behaves like a daemon."""
+    """Which jobs are due - persisted, so `--once` from cron behaves like a daemon."""
     from .library import get_state
 
     now = now if now is not None else time.time()
@@ -146,15 +146,15 @@ def serve(config: Config | None = None, interval: int = 5 * _MINUTE, on_job=None
 
 
 def install_hint(python: str, staging: str) -> str:
-    """The exact line to paste into the OS scheduler. We do not install it ourselves —
+    """The exact line to paste into the OS scheduler. We do not install it ourselves -
     writing to a user's task scheduler behind their back is not our business."""
     return f"""
-  Windows (Task Scheduler) — every 30 minutes:
+  Windows (Task Scheduler) - every 30 minutes:
 
     schtasks /create /tn "Verivann" /sc minute /mo 30 ^
       /tr "{python} -m verivann.cli daemon --once"
 
-  macOS / Linux (cron) — every 30 minutes:
+  macOS / Linux (cron) - every 30 minutes:
 
     */30 * * * *  cd {staging} && {python} -m verivann.cli daemon --once
 

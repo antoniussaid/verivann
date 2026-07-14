@@ -1,11 +1,11 @@
-"""Media adapter — metadata, description AND existing captions via yt-dlp.
+"""Media adapter - metadata, description AND existing captions via yt-dlp.
 
 Order of preference (cheap → expensive): fetch a platform's existing
-subtitles/auto-captions first (yt-dlp, json3 preferred — clean text). Only if
-none exist would local transcription (Whisper) be needed — that is a later
+subtitles/auto-captions first (yt-dlp, json3 preferred - clean text). Only if
+none exist would local transcription (Whisper) be needed - that is a later
 adapter (ROADMAP v0.4). Full visual extraction is v0.6.
 
-yt-dlp runs as a subprocess — optional and swappable — with clean fallbacks.
+yt-dlp runs as a subprocess - optional and swappable - with clean fallbacks.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ _MAX_TRANSCRIPT = 20000  # cap stored transcript length
 def extract_media(url: str, subs_dir: Path | None = None, ask=None) -> Extracted:
     """`ask` is how an interactive caller (the CLI, the app) answers VERIVANN_MEDIA=ask.
 
-    Without it — a scheduled run, a server, a background job — "ask" means no.
+    Without it - a scheduled run, a server, a background job - "ask" means no.
     Silence is never consent.
     """
     if shutil.which("yt-dlp") is None:
@@ -49,13 +49,13 @@ def extract_media(url: str, subs_dir: Path | None = None, ask=None) -> Extracted
     description = data.get("description", "") or ""
 
     # Cheap first: read the captions the platform already published. This touches no
-    # media file at all — the words were already there, in text form.
+    # media file at all - the words were already there, in text form.
     transcript, tlang, cues = _fetch_subtitles(url, subs_dir)
     source = "captions" if transcript else None
 
     # Only if there are none: ask the POLICY (mediapolicy.py) whether the audio may be
     # fetched at all. The default is "yes, but only to transcribe it, and delete it at
-    # once" — and whatever is decided is written into the note, so there is a record.
+    # once" - and whatever is decided is written into the note, so there is a record.
     decision = mediapolicy.decide(has_captions=bool(transcript), asked=ask, url=url)
     media_note = decision.note
 
@@ -67,7 +67,7 @@ def extract_media(url: str, subs_dir: Path | None = None, ask=None) -> Extracted
             source = "whisper"
         else:
             media_note = (
-                "No transcript could be produced (local transcription is off — "
+                "No transcript could be produced (local transcription is off - "
                 "set VERIVANN_WHISPER_MODEL). Nothing was kept."
             )
 
@@ -166,7 +166,7 @@ def _lang_from_name(name: str) -> str:
 
 
 def _json3_to_cues(raw: str) -> list[tuple[int, str]]:
-    """[(second, line)] — json3 carries per-event start times; keep them."""
+    """[(second, line)] - json3 carries per-event start times; keep them."""
     try:
         data = json.loads(raw)
     except ValueError:
@@ -232,7 +232,7 @@ def timestamp(seconds: int) -> str:
 
 
 def seek_template(url: str) -> str | None:
-    """A URL pattern that jumps to a second — only where the platform supports it."""
+    """A URL pattern that jumps to a second - only where the platform supports it."""
     low = url.lower()
     if "youtube.com" in low or "youtu.be" in low:
         sep = "&" if "?" in url else "?"
@@ -243,6 +243,6 @@ def seek_template(url: str) -> str | None:
 def _fallback(url: str, error: str) -> Extracted:
     return Extracted(
         title=url,
-        text=f"[Media extraction limited — process manually]\nURL: {url}\nReason: {error}",
+        text=f"[Media extraction limited - process manually]\nURL: {url}\nReason: {error}",
         meta={"url": url, "error": error, "fallback": True},
     )

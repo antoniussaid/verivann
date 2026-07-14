@@ -1,4 +1,4 @@
-"""Going out to look — the only adapter that fetches something nobody asked for.
+"""Going out to look - the only adapter that fetches something nobody asked for.
 
 Every other adapter reads what the user handed it. This one goes hunting: it takes
 a query and comes back with links, so that `counter.py` can fetch the other side of
@@ -6,9 +6,9 @@ an argument instead of merely noting that one is missing.
 
 Two backends, both opt-in, neither of them a scraper:
 
-    SearXNG   VERIVANN_SEARCH_URL=http://localhost:8888   — self-hosted, no key, no terms
+    SearXNG   VERIVANN_SEARCH_URL=http://localhost:8888   - self-hosted, no key, no terms
               to violate, and the results never touch a third party's log.
-    Brave     VERIVANN_SEARCH_KEY=...                     — a real API with a free tier.
+    Brave     VERIVANN_SEARCH_KEY=...                     - a real API with a free tier.
 
 We do not scrape Google or Bing. Their terms forbid it, and a tool whose selling
 point is honesty cannot start by breaking someone's rules quietly.
@@ -45,7 +45,7 @@ def available() -> bool:
 
 
 def search(query: str, limit: int = 5) -> list[Result]:
-    """Links for a query. Empty list on any failure — searching is never load-bearing."""
+    """Links for a query. Empty list on any failure - searching is never load-bearing."""
     which = backend()
     try:
         if which == "searxng":

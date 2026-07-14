@@ -55,7 +55,7 @@ def test_profile_nudges_heuristic_confidence_and_can_propose_a_drop(tmp_path):
     nudged = apply_profile(Analysis(**vars(baseline)), extracted, profile)
 
     assert nudged.confidence < baseline.confidence
-    assert nudged.action == "drop"  # a proposal — nothing is deleted
+    assert nudged.action == "drop"  # a proposal - nothing is deleted
     assert "drop" in nudged.reason.lower()
 
 

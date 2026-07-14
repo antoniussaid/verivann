@@ -18,7 +18,7 @@ Two rules keep this honest:
    month counts a quarter of a note you explicitly threw away. The learned profile
    (relevance.py) sums weights, so a hundred silences never shout down one verdict.
 
-`verivann review` shows the implied drops and lets you overrule them in one pass —
+`verivann review` shows the implied drops and lets you overrule them in one pass -
 the cheapest judgment loop we can build.
 """
 
@@ -40,7 +40,7 @@ IGNORED_AFTER_DAYS = 30
 
 
 def observe(note_id: str, kind: str, staging_dir: Path) -> None:
-    """Record something the human did — and let it speak, quietly, as a verdict."""
+    """Record something the human did - and let it speak, quietly, as a verdict."""
     if kind not in WEIGHTS:
         return
     from .library import add_signal, record_feedback
@@ -62,7 +62,7 @@ class Implied:
 
 
 def implied_drops(staging_dir: Path, days: int = IGNORED_AFTER_DAYS) -> list[Implied]:
-    """Notes your silence has already judged — offered back for confirmation."""
+    """Notes your silence has already judged - offered back for confirmation."""
     from datetime import date, datetime, timezone
 
     from .library import untouched_notes
@@ -86,7 +86,7 @@ def implied_drops(staging_dir: Path, days: int = IGNORED_AFTER_DAYS) -> list[Imp
 def sweep(staging_dir: Path, days: int = IGNORED_AFTER_DAYS) -> int:
     """Write the quiet verdict for everything you have ignored long enough.
 
-    Called by `verivann review --sweep` and by the cockpit — never silently at intake,
+    Called by `verivann review --sweep` and by the cockpit - never silently at intake,
     because a tool that judges your notes behind your back is not a tool you can trust.
     """
     from .library import record_feedback

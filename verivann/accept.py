@@ -1,4 +1,4 @@
-"""The one place a proposal becomes a commitment — and a human does it.
+"""The one place a proposal becomes a commitment - and a human does it.
 
 Everything in Verivann is a proposal. The router proposes a domain, the analyzer
 proposes an action, the profile proposes a drop. Nothing is ever written into a
@@ -6,7 +6,7 @@ knowledge base, because deciding what enters your memory is not a job you delega
 to a keyword count or a language model.
 
 `verivann accept <id> --to <dir>` is where you decide. It copies the staged note into
-a plain folder — an Obsidian vault, a git repo, whatever reads Markdown — with the
+a plain folder - an Obsidian vault, a git repo, whatever reads Markdown - with the
 proposal resolved into a fact:
 
     proposed_action: note      ->     action: note
@@ -63,7 +63,7 @@ def accept(note_id: str, target_dir: Path, config: Config | None = None) -> Acce
         return None
     target.write_text(content, encoding="utf-8")
 
-    # Accepting is the strongest possible "keep" — the router should learn from it,
+    # Accepting is the strongest possible "keep" - the router should learn from it,
     # and nobody should have to press a second button to say so.
     observe(row["id"], "accept", config.staging_dir)
     log_event("accept", row["id"], str(target), config.staging_dir)
@@ -77,18 +77,18 @@ def _resolve(markdown: str) -> str:
     """Turn the proposal in the frontmatter into a decision a human made.
 
     Scoped to the frontmatter block, so a stray `action:` line in the note body can
-    never be mistaken for the decision field. Acceptance is always stamped — even a
+    never be mistaken for the decision field. Acceptance is always stamped - even a
     note that never carried a `proposed_action` leaves this gate marked accepted by a
     human, because recording *who committed it* is the whole job of the gate.
     """
     today = datetime.now(timezone.utc).date().isoformat()
     marked = markdown.replace(
-        "_(proposal only — never committed here)_",
+        "_(proposal only - never committed here)_",
         f"_(accepted by you on {today})_",
     )
 
     m = _FRONTMATTER.search(marked)
-    if not m:  # no frontmatter — prepend one so the human decision is still recorded
+    if not m:  # no frontmatter - prepend one so the human decision is still recorded
         return f"---\naction: note\naccepted_at: {today}\naccepted_by: human\n---\n\n{marked}"
 
     block = m.group(2)
@@ -111,7 +111,7 @@ def _unclobbered(target: Path, content: str) -> Path | None:
     Re-accepting the same note (same `id`, even on a later day) reuses its file;
     a real filename collision with another note gets a numeric suffix instead of
     silently destroying it. Returns None if no safe path exists (so the caller
-    refuses rather than clobbering) — fail closed, never fail open.
+    refuses rather than clobbering) - fail closed, never fail open.
     """
     new_id = _note_id_of(content)
 
@@ -135,6 +135,6 @@ def accept_all(note_ids: list[str], target_dir: Path, config: Config | None = No
 
 
 def default_target() -> Path | None:
-    """`VERIVANN_ACCEPT_DIR` — so `verivann accept <id>` needs no flag in daily use."""
+    """`VERIVANN_ACCEPT_DIR` - so `verivann accept <id>` needs no flag in daily use."""
     value = os.environ.get("VERIVANN_ACCEPT_DIR", "").strip()
     return Path(value) if value else None

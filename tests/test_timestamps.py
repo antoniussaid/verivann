@@ -1,7 +1,7 @@
 """Time-window queries must respect the actual instant, not a string tiebreak.
 
-Notes store `created_at` as Python's `isoformat()` — `2026-07-13T12:00:00+00:00`,
-with a `T` and an offset. SQLite's `datetime('now')` is `2026-07-13 12:00:00` —
+Notes store `created_at` as Python's `isoformat()` - `2026-07-13T12:00:00+00:00`,
+with a `T` and an offset. SQLite's `datetime('now')` is `2026-07-13 12:00:00` -
 a space, no offset. A raw string comparison of the two sorts by the date prefix
 and then breaks ties on the separator (`T` > space), so a note created early on
 the boundary day was misclassified. The fix compares via `julianday()` on both

@@ -1,7 +1,7 @@
 """Sources change after you read them. Nobody tells you.
 
 A news site corrects a number, a company deletes a paragraph, a price moves, a
-promise disappears. The archive tools keep snapshots — but a snapshot only helps
+promise disappears. The archive tools keep snapshots - but a snapshot only helps
 if you already suspected something. Verivann does the suspecting for you: it re-reads
 what you told it to watch and shows you **what changed**, in the words that
 changed.
@@ -10,7 +10,7 @@ changed.
     verivann watch run           re-read them all; changed ones produce a fresh note
     verivann watch list          what is being watched, and when it last moved
 
-A changed source is digested again — same note (canonical identity), new content,
+A changed source is digested again - same note (canonical identity), new content,
 plus a **Changed since you read it** section carrying the diff. What the source
 now says is what your library now holds; what it *used* to say is in the diff.
 """
@@ -87,7 +87,7 @@ def run(config: Config | None = None, lens: str | None = None) -> list[tuple[str
             continue
         fresh = extract_webpage(entry.url)
         if not fresh.text.strip() or fresh.meta.get("fallback"):
-            continue  # a failed fetch is not a change — never cry wolf
+            continue  # a failed fetch is not a change - never cry wolf
         new_digest = _digest(fresh.text)
         if new_digest == state["digest"]:
             watch_mark(entry.url, digest=new_digest, changed=False, staging_dir=config.staging_dir)
@@ -101,7 +101,7 @@ def run(config: Config | None = None, lens: str | None = None) -> list[tuple[str
             staging_dir=config.staging_dir,
             text=fresh.text,
         )
-        digest(  # the note now holds what the source NOW says — plus what it used to
+        digest(  # the note now holds what the source NOW says - plus what it used to
             "url",
             ref=entry.url,
             config=config,

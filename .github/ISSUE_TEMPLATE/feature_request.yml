@@ -7,7 +7,7 @@ body:
       value: |
         Ideas are welcome. Verivann has a strong point of view (see CONTRIBUTING.md), so
         the most useful suggestions fit its grain: local-first, propose-only, orchestrate
-        rather than bundle. It's fine if yours doesn't yet — describe the need and we'll
+        rather than bundle. It's fine if yours doesn't yet - describe the need and we'll
         find the shape together.
   - type: textarea
     id: problem

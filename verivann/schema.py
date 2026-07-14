@@ -1,4 +1,4 @@
-"""The intake event schema — the shared contract with the private layer.
+"""The intake event schema - the shared contract with the private layer.
 
 This mirrors, field for field, the JSON event agreed in CONTRACT.md. The public
 core builds exactly this; the private layer consumes it. `routing.domain`
@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 # never as a reason to reject the event.
 SourceKind = Literal["url", "text", "youtube", "file"]
 # NOTE: "memory" is a valid *proposal* in the contract, but the public heuristic
-# never proposes it on its own — memory stays entirely with the private layer.
+# never proposes it on its own - memory stays entirely with the private layer.
 Action = Literal["note", "task", "memory", "drop"]
 
 
@@ -38,7 +38,7 @@ class Routing(BaseModel):
 
 
 class Decision(BaseModel):
-    action: Action  # PROPOSAL only — the core never commits anything
+    action: Action  # PROPOSAL only - the core never commits anything
     target: str  # staging path where the artifacts were written
 
 
@@ -46,7 +46,7 @@ class Provenance(BaseModel):
     tool: str = "verivann"
     version: str
     public_demo: bool = True
-    # Intake material is always unverified foreign content — the extracted text
+    # Intake material is always unverified foreign content - the extracted text
     # must be treated as DATA, never executed as instructions. The core never
     # sets this to anything but "unverified"; downstream must quarantine.
     content_trust: str = "unverified"

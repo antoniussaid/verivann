@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Verivann",
   "version": "0.1.0",
-  "description": "Send the page, a link, or a selection to your local Verivann inbox — routed, proposal-only.",
+  "description": "Send the page, a link, or a selection to your local Verivann inbox - routed, proposal-only.",
   "permissions": ["contextMenus", "storage", "activeTab"],
   "host_permissions": ["http://127.0.0.1/*", "http://localhost/*"],
   "optional_host_permissions": ["http://*/*"],

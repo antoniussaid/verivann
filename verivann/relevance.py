@@ -1,4 +1,4 @@
-"""Learned relevance — the router adapts to what you actually keep.
+"""Learned relevance - the router adapts to what you actually keep.
 
 Every archiver treats all captured material as equally worth keeping. Verivann does
 not: `verivann keep <id>` / `verivann drop <id>` records a verdict, and from those
@@ -6,14 +6,14 @@ verdicts the router builds a profile of the reader.
 
 Two effects, both deliberately conservative:
 
-  * heuristic routing — a new intake whose vocabulary matches what you kept gains
+  * heuristic routing - a new intake whose vocabulary matches what you kept gains
     confidence; one that matches what you dropped loses it, and at a strong
     negative it is *proposed* as a drop. Still a proposal. Nothing is ever
     committed or deleted.
-  * LLM routing — the profile becomes a one-line preference hint in the system
+  * LLM routing - the profile becomes a one-line preference hint in the system
     prompt ("kept: …, dropped: …").
 
-Below MIN_SIGNAL judged notes the profile stays silent — a router that "learns"
+Below MIN_SIGNAL judged notes the profile stays silent - a router that "learns"
 from two clicks is superstition, not learning.
 """
 
@@ -31,7 +31,7 @@ from .schema import Extracted
 
 MIN_SIGNAL = 3  # judged notes needed before the profile is trusted at all
 # Only a strong, well-evidenced negative may turn a "note" into a proposed "drop".
-# score = match × trust, and trust = judged/12 — so this needs ~6+ verdicts that
+# score = match × trust, and trust = judged/12 - so this needs ~6+ verdicts that
 # nearly all point the same way. Below that the profile only shifts confidence.
 _DROP_AT = -0.45
 _TOKENS = re.compile(r"[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9\-]{2,}")
@@ -57,7 +57,7 @@ class Profile:
     n_kept: int = 0
     n_dropped: int = 0
     # Verdicts you actually gave, as opposed to ones your behaviour implied. The
-    # profile only comes alive on the strength of real evidence — a pile of
+    # profile only comes alive on the strength of real evidence - a pile of
     # inferred drops is not a taste, it is a backlog.
     weight_kept: float = 0.0
     weight_dropped: float = 0.0
@@ -97,7 +97,7 @@ class Profile:
         return round(raw * trust, 3)
 
     def hint(self) -> str:
-        """One line for the LLM system prompt — never the raw material, just the taste."""
+        """One line for the LLM system prompt - never the raw material, just the taste."""
         if not self.active:
             return ""
         keep = ", ".join(w for w, _ in self.kept.most_common(8) if self.dropped[w] == 0)
@@ -111,7 +111,7 @@ class Profile:
             return ""
         return (
             f"Across {self.judged} judged notes, {'; '.join(parts)}. "
-            "Use this as a mild prior for relevance and confidence — never as a reason "
+            "Use this as a mild prior for relevance and confidence - never as a reason "
             "to distort what the material actually says."
         )
 

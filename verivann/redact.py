@@ -2,13 +2,13 @@
 
 The privacy rule (privacy.py) is binary and honest: sensitive material either goes
 to a local model or to nobody. That is correct, and for a person without a local
-model it is also useless — their screenshots, their PDFs, their voice memos simply
+model it is also useless - their screenshots, their PDFs, their voice memos simply
 never get read.
 
 So here is the middle path, and as far as we can tell nobody in this field offers
 it: **redact locally, then upload.** Account numbers, card numbers, phone numbers,
 emails, addresses, dates of birth, names and amounts are replaced with stable
-placeholders *before* the text leaves the machine, and put back — locally — in the
+placeholders *before* the text leaves the machine, and put back - locally - in the
 note you read.
 
     VERIVANN_REDACT=1     analyze sensitive material after redaction (opt-in, explicit)
@@ -16,7 +16,7 @@ note you read.
 Three properties that make this trustworthy rather than a comfort blanket:
 
 1. **Placeholders are stable within a note** (`[PERSON_1]` is the same person
-   throughout), so the model can still reason about who did what — it just never
+   throughout), so the model can still reason about who did what - it just never
    learns who they are.
 2. **The mapping never leaves the machine.** It lives in memory for the duration of
    one analysis and is used to restore the note locally.
@@ -26,7 +26,7 @@ Three properties that make this trustworthy rather than a comfort blanket:
    is selling something.
 
 For a bank statement that is a good trade. For a psychiatric report it is not, and
-the honest advice — printed by the tool itself — is to keep `VERIVANN_PRIVACY=strict`
+the honest advice - printed by the tool itself - is to keep `VERIVANN_PRIVACY=strict`
 and install a local model.
 """
 
@@ -75,19 +75,19 @@ class Redaction:
         return bool(self.mapping)
 
     def restore(self, text: str) -> str:
-        """Put the truth back — locally, in the note you read."""
+        """Put the truth back - locally, in the note you read."""
         for placeholder, original in self.mapping.items():
             text = text.replace(placeholder, original)
         return text
 
     def summary(self) -> str:
         if not self.any:
-            return "Nothing identifiable was found to redact — the text was sent as it is."
+            return "Nothing identifiable was found to redact - the text was sent as it is."
         parts = ", ".join(f"{n}× {kind.lower()}" for kind, n in sorted(self.counts.items()))
         return (
             f"Redacted before upload: {parts}. The originals never left this machine; "
             "they were put back into this note locally. Redaction is pattern matching, "
-            "not a guarantee — an unusual name or format can slip through."
+            "not a guarantee - an unusual name or format can slip through."
         )
 
 

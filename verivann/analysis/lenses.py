@@ -1,4 +1,4 @@
-"""Lenses — the same material, read with a different intent.
+"""Lenses - the same material, read with a different intent.
 
 A lens does not change the contract: every analysis still returns the routing
 keys (domain / confidence / reason / action) and three lists. What a lens changes
@@ -55,12 +55,12 @@ _LENSES: dict[str, Lens] = {
         name="critique",
         description="Skeptical read: weak points, missing evidence, what would falsify it.",
         guidance=(
-            "Read adversarially, but fairly — you are not obliged to agree with the "
+            "Read adversarially, but fairly - you are not obliged to agree with the "
             "material. useful_ideas = the weakest points, stated plainly (what is "
             "asserted without support, what is conflated, what is left out). "
             "claims_to_verify = the assertions that carry the argument and are "
             "unsupported. possible_actions = what evidence would settle it, or what "
-            "would falsify the central claim. If the material is sound, say so — do "
+            "would falsify the central claim. If the material is sound, say so - do "
             "not invent flaws."
         ),
         headings=("Weak points", "Unsupported claims", "What would settle it"),

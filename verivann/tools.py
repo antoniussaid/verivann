@@ -1,7 +1,7 @@
 """Health of the external tools Verivann orchestrates but never bundles.
 
 yt-dlp is the one that rots: video sites change constantly, so an old copy silently
-returns empty transcripts. `vv doctor` reporting a bare "yes" hid that — a six-month-old
+returns empty transcripts. `vv doctor` reporting a bare "yes" hid that - a six-month-old
 yt-dlp looked identical to a fresh one. This reports the version and its age, so the
 single largest predicted support case ("my transcripts are empty") answers itself.
 """
@@ -50,5 +50,5 @@ def ytdlp_health(today: date, version: str | None = None) -> str:
         return "no (youtube falls back)"
     age = staleness_days(version, today)
     if age is not None and age > _STALE_AFTER_DAYS:
-        return f"{version} — {age} days old, run `yt-dlp -U` (stale versions return empty transcripts)"
+        return f"{version} - {age} days old, run `yt-dlp -U` (stale versions return empty transcripts)"
     return version

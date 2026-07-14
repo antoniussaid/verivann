@@ -1,6 +1,6 @@
 """The material is German. The tool was not.
 
-An Austrian reads German articles, watches German videos and writes German notes —
+An Austrian reads German articles, watches German videos and writes German notes -
 and every prompt in this codebase was in English, every keyword list was half-hearted
 about German, and nobody ever measured what that cost. It is the kind of failure that
 does not announce itself: the summaries come back in English, the routing is a little
@@ -8,12 +8,12 @@ worse, and you assume the model is just mediocre.
 
 Two things happen here:
 
-1. **The language of the material is detected** — cheaply, offline, by looking at
+1. **The language of the material is detected** - cheaply, offline, by looking at
    function words. No dependency, no model, and it does not need to be clever: it needs
    to tell German from English from Spanish, which is a job that stopwords do well.
 2. **The analyzer is told to answer in that language.** The instructions stay English
    (models follow English instructions better, and our prompts are engineered), but the
-   *output* — summary, ideas, claims, reason — comes back in the language you read.
+   *output* - summary, ideas, claims, reason - comes back in the language you read.
 
 The heuristic router also gets a proper German vocabulary, because "Vorsorge" and
 "Kündigungsfrist" should route as surely as "insurance" and "deadline".
@@ -49,7 +49,7 @@ _NAMES = {"de": "German", "en": "English", "es": "Spanish", "fr": "French", "it"
 
 
 def detect(text: str, sample: int = 3000) -> str:
-    """The language of the material — 'de', 'en', … Falls back to 'en' when unsure.
+    """The language of the material - 'de', 'en', … Falls back to 'en' when unsure.
 
     Deliberately conservative: German and English share a lot of short words, so a
     close call goes to English, which is what the prompts already assume.
@@ -75,7 +75,7 @@ def name(code: str) -> str:
 def instruction(code: str) -> str:
     """What we add to the system prompt so the ANSWER comes back in the reader's language.
 
-    The instructions themselves stay in English — models follow English instructions
+    The instructions themselves stay in English - models follow English instructions
     more reliably, and our prompts are tuned. It is the output that must change.
     """
     if code == "en":

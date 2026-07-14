@@ -1,4 +1,4 @@
-"""Library — a searchable index of everything Verivann has digested.
+"""Library - a searchable index of everything Verivann has digested.
 
 A local SQLite database (FTS5 full-text search when available, LIKE fallback
 otherwise) over the staged notes. This is the foundation for search, "ask your
@@ -24,7 +24,7 @@ _STOP = {
 
 
 def keywords(text: str, max_words: int = 12) -> str:
-    """A safe FTS query — significant words OR-ed. Prevents FTS syntax errors."""
+    """A safe FTS query - significant words OR-ed. Prevents FTS syntax errors."""
     words = [w for w in re.findall(r"[A-Za-zÀ-ÿ0-9]{3,}", text.lower()) if w not in _STOP]
     unique = list(dict.fromkeys(words))[:max_words]
     return " OR ".join(unique)
@@ -133,7 +133,7 @@ def _connect(staging_dir: Path) -> sqlite3.Connection:
             id INTEGER PRIMARY KEY AUTOINCREMENT, note_id TEXT, text TEXT, at TEXT )"""
     )
     # The model bake-off: what each model proposed for the same note. Scored later
-    # against the only ground truth there is — the human's verdict.
+    # against the only ground truth there is - the human's verdict.
     con.execute(
         """CREATE TABLE IF NOT EXISTS bakeoff (
             note_id TEXT, model TEXT, proposed TEXT, confidence REAL, at TEXT,
@@ -154,8 +154,8 @@ def _connect(staging_dir: Path) -> sqlite3.Connection:
         con.execute(
             "CREATE VIRTUAL TABLE IF NOT EXISTS claims_fts USING fts5(claim, note_id UNINDEXED)"
         )
-    # Late columns, added in place. Done here — not lazily on the path that happens
-    # to need them — so the schema is never half-built for whoever queries next.
+    # Late columns, added in place. Done here - not lazily on the path that happens
+    # to need them - so the schema is never half-built for whoever queries next.
     _ensure_canon(con)  # after every table exists: the backfill writes into `sources`
     _ensure_claim_expiry(con)
     _ensure_feedback_origin(con)
@@ -197,14 +197,14 @@ _LATE_COLUMNS = {
     "source_key": "TEXT",  # WHO published it (see sources.py)
     "minutes": "REAL",  # how much material it was
     "ideas": "INTEGER",  # how much came out of it
-    "engine": "TEXT",  # who read it — a yield of 0 means nothing if nobody read it
+    "engine": "TEXT",  # who read it - a yield of 0 means nothing if nobody read it
     "lens": "TEXT",  # with what intent it was read (calibration compares lenses)
     "sensitivity": "TEXT",  # public | sensitive  (privacy.py)
 }
 
 
 def _ensure_canon(con: sqlite3.Connection) -> None:
-    """Columns added after the first release — created and backfilled in place.
+    """Columns added after the first release - created and backfilled in place.
 
     Notes indexed before canonicalization carried raw refs (the same video under
     `?t=78s` looked like a different source); notes indexed before source identity
@@ -431,7 +431,7 @@ def _merge_into(con: sqlite3.Connection, keeper_id: str, dupe_id: str) -> None:
 
 
 def merge_notes(keeper_id: str, dupe_id: str, staging_dir: Path) -> None:
-    """Public single-pair merge — used by semantic dedup, which pairs by meaning."""
+    """Public single-pair merge - used by semantic dedup, which pairs by meaning."""
     con = _connect(staging_dir)
     try:
         _merge_into(con, keeper_id, dupe_id)
@@ -469,7 +469,7 @@ def find_related(text: str, staging_dir: Path, exclude_ref: str = "", limit: int
 def index_claims(
     note_id: str, claims: list[str], staging_dir: Path, shelf_life_days: int = 0
 ) -> None:
-    """Record a note's claims — each with the date it should be re-checked.
+    """Record a note's claims - each with the date it should be re-checked.
 
     A stock price is stale tomorrow; a mathematical fact is not stale in a decade.
     `shelf_life_days` (estimated by the analyzer) turns the ledger from a pile into
@@ -480,7 +480,7 @@ def index_claims(
     con = _connect(staging_dir)
     try:
         _ensure_claim_expiry(con)
-        # Re-ingesting the same source replaces its claims — never stacks them.
+        # Re-ingesting the same source replaces its claims - never stacks them.
         con.execute("DELETE FROM claims WHERE note_id = ?", (note_id,))
         if _fts_available(con):
             con.execute("DELETE FROM claims_fts WHERE note_id = ?", (note_id,))
@@ -507,7 +507,7 @@ def _ensure_claim_expiry(con: sqlite3.Connection) -> None:
 
 
 def stale_claims(staging_dir: Path, limit: int = 40) -> list[dict]:
-    """Claims whose shelf life has run out — they should be checked again."""
+    """Claims whose shelf life has run out - they should be checked again."""
     con = _connect(staging_dir)
     try:
         _ensure_claim_expiry(con)
@@ -530,7 +530,7 @@ def stale_claims(staging_dir: Path, limit: int = 40) -> list[dict]:
 def find_related_claims(
     claim: str, staging_dir: Path, exclude_note: str = "", limit: int = 3
 ) -> list[tuple[str, str]]:
-    """Past claims that touch the same subject — the raw material for contradiction checks."""
+    """Past claims that touch the same subject - the raw material for contradiction checks."""
     query = keywords(claim)
     if not query:
         return []
@@ -552,7 +552,7 @@ def find_related_claims(
 
 
 def claim_origin(claim_text: str, staging_dir: Path) -> dict | None:
-    """Where a claim came from — and whether you KEPT that note.
+    """Where a claim came from - and whether you KEPT that note.
 
     A source contradicting a source is noise. A source contradicting something you
     decided to keep is you contradicting yourself, and that deserves a louder line.
@@ -937,7 +937,7 @@ def mirror_rows(staging_dir: Path, days: int = 30) -> dict:
 
 
 def kept_hits(query: str, staging_dir: Path, limit: int = 12) -> list[dict]:
-    """Notes on a topic that you KEPT — the material your opinion actually rests on."""
+    """Notes on a topic that you KEPT - the material your opinion actually rests on."""
     con = _connect(staging_dir)
     try:
         if _fts_available(con):
@@ -1197,7 +1197,7 @@ def outbound_total(staging_dir: Path, days: int = 30) -> tuple[int, float]:
 # ---------- signals, state, the furnace log ----------
 
 def add_highlight(note_id: str, text: str, staging_dir: Path) -> None:
-    """What YOU marked — as opposed to what the source claimed. Not the same thing."""
+    """What YOU marked - as opposed to what the source claimed. Not the same thing."""
     con = _connect(staging_dir)
     try:
         con.execute(
@@ -1249,7 +1249,7 @@ def signal_counts(staging_dir: Path) -> dict[str, dict[str, int]]:
 def untouched_notes(staging_dir: Path, days: int, limit: int = 200) -> list[dict]:
     """Notes older than `days` that you never judged and never touched again.
 
-    Silence is data. Not a loud verdict — a quiet one.
+    Silence is data. Not a loud verdict - a quiet one.
     """
     con = _connect(staging_dir)
     try:
@@ -1493,7 +1493,7 @@ def record_feedback(
 
     A prefix of the id is enough (uuids are long); the first match wins.
 
-    `origin` records WHERE the verdict came from — you said so (`explicit`), you
+    `origin` records WHERE the verdict came from - you said so (`explicit`), you
     accepted the note into a real folder (`accept`), or your behaviour implied it
     (`implicit`, see signals.py). An inferred verdict NEVER overwrites one you
     actually gave: guessing is allowed to fill a silence, never to contradict you.
@@ -1560,10 +1560,10 @@ def verdict_of(note_id: str, staging_dir: Path) -> str:
 
 
 def judged_rows(staging_dir: Path, limit: int = 1000) -> list[dict]:
-    """Everything the human (or their behaviour) has ruled on — the ground truth.
+    """Everything the human (or their behaviour) has ruled on - the ground truth.
 
     This is what calibration (calibrate.py) measures the ROUTER against: for every
-    note, what we proposed, how sure we were, who read it — and what actually
+    note, what we proposed, how sure we were, who read it - and what actually
     happened to it.
     """
     con = _connect(staging_dir)
@@ -1624,7 +1624,7 @@ def checkpoint(staging_dir: Path) -> None:
 
 def purge_source(source_key: str, staging_dir: Path) -> dict:
     """Erase one source completely: its notes, their files on disk, and every row that
-    referenced them — claims, feedback, predictions, contradictions, the lot."""
+    referenced them - claims, feedback, predictions, contradictions, the lot."""
     if not _db_path(staging_dir).exists():
         return {"source": source_key, "notes": 0, "files": 0}
     con = _connect(staging_dir)

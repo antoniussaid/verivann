@@ -1,7 +1,7 @@
 """Generic, runtime-populated domain registry.
 
 The public core ships only neutral placeholder domains. The real the private domains
-are injected at runtime from a private config the private layer owns — they are
+are injected at runtime from a private config the private layer owns - they are
 never committed, and never appear in example outputs.
 """
 

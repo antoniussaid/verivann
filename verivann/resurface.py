@@ -3,13 +3,13 @@
 A library only pays you back if it interrupts you. Yours does not: it waits to be
 searched, which means it only ever gives you what you already remembered you had.
 
-`verivann resurface` goes the other way. It takes what you are working on *now* — your
-open questions, and the material you have digested this week — and looks for notes
+`verivann resurface` goes the other way. It takes what you are working on *now* - your
+open questions, and the material you have digested this week - and looks for notes
 you **kept months ago** that speak to it. Not "related notes"; forgotten ones. A
 note you saw yesterday is not a discovery.
 
 Nothing here needs a model: it is retrieval (hybrid when an embedder is configured)
-plus one rule that most tools are too polite to apply — *recent things do not count*.
+plus one rule that most tools are too polite to apply - *recent things do not count*.
 """
 
 from __future__ import annotations

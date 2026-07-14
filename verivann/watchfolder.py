@@ -1,7 +1,7 @@
 """The folder that empties itself.
 
 Point Verivann at your screenshots folder, your voice-memo folder, your downloads.
-It reads what is new, routes it, and remembers what it has already seen — so
+It reads what is new, routes it, and remembers what it has already seen - so
 running it again is cheap and never produces a duplicate.
 
     verivann folder ~/Pictures/Screenshots          once

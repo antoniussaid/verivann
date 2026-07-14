@@ -5,7 +5,7 @@ on:
     branches: [main]
   pull_request:
 
-# Cancel superseded runs on the same ref — save CI minutes on rapid pushes.
+# Cancel superseded runs on the same ref - save CI minutes on rapid pushes.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

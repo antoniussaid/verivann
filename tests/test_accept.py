@@ -1,6 +1,6 @@
 """The commit gate: `accept` is the one place a proposal becomes a commitment.
 
-It has to get three things right — resolve the proposal into a decision, stamp who
+It has to get three things right - resolve the proposal into a decision, stamp who
 committed it, and never destroy what is already in the user's vault.
 """
 
@@ -39,7 +39,7 @@ def test_accept_resolves_the_proposal_and_stamps_the_decision(tmp_path):
     assert "proposed_action:" not in written           # the proposal is resolved away
     assert re.search(r"^accepted_at:\s*\d{4}-\d{2}-\d{2}", written, re.MULTILINE)
     assert "accepted_by: human" in written             # who committed it is on record
-    assert "proposal only — never committed here" not in written
+    assert "proposal only - never committed here" not in written
 
 
 def test_accept_returns_none_for_an_unknown_id(tmp_path):
@@ -101,7 +101,7 @@ _NOTE = (
     "domain: research\n"
     "---\n\n"
     "# Title\n\n"
-    "- Proposed action: task  _(proposal only — never committed here)_\n"
+    "- Proposed action: task  _(proposal only - never committed here)_\n"
 )
 
 
@@ -119,7 +119,7 @@ def test_resolve_stamps_acceptance():
 
 def test_resolve_updates_the_proposal_marker_in_the_body():
     out = _resolve(_NOTE)
-    assert "proposal only — never committed here" not in out
+    assert "proposal only - never committed here" not in out
     assert re.search(r"_\(accepted by you on \d{4}-\d{2}-\d{2}\)_", out)
 
 
@@ -177,7 +177,7 @@ def test_unclobbered_suffixes_a_colliding_different_note(tmp_path):
 
 
 def test_unclobbered_fails_closed_when_no_safe_path_exists(tmp_path, monkeypatch):
-    """If every candidate is taken by a DIFFERENT note, refuse — never overwrite one."""
+    """If every candidate is taken by a DIFFERENT note, refuse - never overwrite one."""
     from verivann import accept as acc
 
     monkeypatch.setattr(acc.Path, "exists", lambda self: True)  # every name is taken...

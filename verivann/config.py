@@ -1,7 +1,7 @@
 """Runtime configuration.
 
-Everything that could be private — real domains, staging location, the LLM
-provider/model/key — comes from the environment or an (uncommitted) private
+Everything that could be private - real domains, staging location, the LLM
+provider/model/key - comes from the environment or an (uncommitted) private
 config. Neutral defaults keep the public core runnable and free on its own:
 with no LLM configured, analysis falls back to the offline heuristic.
 """
@@ -20,16 +20,16 @@ from .registry import DEFAULT_PUBLIC_DOMAINS
 #
 # Nearly everyone speaks the OpenAI wire format now, so a preset is just a base
 # URL. These exist because "work out the right base_url yourself" is a terrible
-# first experience — and because the FREE tiers are the point: a person should be
+# first experience - and because the FREE tiers are the point: a person should be
 # able to run this properly without paying anyone a cent.
 _PROVIDER_DEFAULTS = {
     "openai": ("https://api.openai.com/v1", ""),
     "anthropic": ("https://api.anthropic.com", ""),
-    # Local — nothing ever leaves the machine.
+    # Local - nothing ever leaves the machine.
     "ollama": ("http://localhost:11434/v1", "ollama"),
     "lmstudio": ("http://localhost:1234/v1", "lmstudio"),
     # Hosted, all with a free tier.
-    "cloudflare": ("", ""),  # needs the account id — see _preset_base()
+    "cloudflare": ("", ""),  # needs the account id - see _preset_base()
     "groq": ("https://api.groq.com/openai/v1", ""),
     "openrouter": ("https://openrouter.ai/api/v1", ""),
     "gemini": ("https://generativelanguage.googleapis.com/v1beta/openai/", ""),
@@ -70,7 +70,7 @@ class LLMConfig:
 
 @dataclass
 class EmbedConfig:
-    """The embedding slot — separate from the chat slot on purpose.
+    """The embedding slot - separate from the chat slot on purpose.
 
     Local embeddings are cheap and private (Ollama: `nomic-embed-text`), so many
     people will want meaning-search locally even while using a hosted model for
@@ -89,7 +89,7 @@ class Config:
     public_demo: bool = True
     llm: LLMConfig = field(default_factory=LLMConfig)
     # The slot that never leaves the machine. Sensitive material (anything off your
-    # own disk, anything carrying an IBAN or a diagnosis) is routed here — see
+    # own disk, anything carrying an IBAN or a diagnosis) is routed here - see
     # privacy.py. Without it, sensitive material is not uploaded; it is simply not
     # read by a model at all.
     local_llm: LLMConfig = field(default_factory=LLMConfig)
@@ -132,7 +132,7 @@ class Config:
 
 
 def _preset_base(provider: str, default: str) -> str:
-    """Cloudflare's endpoint carries the account id — everyone else's is a constant."""
+    """Cloudflare's endpoint carries the account id - everyone else's is a constant."""
     if provider == "cloudflare":
         account = os.environ.get("VERIVANN_CF_ACCOUNT_ID", "").strip()
         return f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/v1" if account else ""
@@ -157,7 +157,7 @@ def _load_llm(prefix: str = "VERIVANN_LLM") -> LLMConfig:
 
 
 def _load_embed(llm: LLMConfig) -> EmbedConfig:
-    """Defaults to the chat provider's endpoint — but only if that provider has one."""
+    """Defaults to the chat provider's endpoint - but only if that provider has one."""
     model = os.environ.get("VERIVANN_EMBED_MODEL", "").strip()
     if not model:
         return EmbedConfig()  # disabled -> keyword search only

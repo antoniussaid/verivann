@@ -1,6 +1,6 @@
 name: Publish to PyPI
 
-# Publishes on a GitHub Release via PyPI Trusted Publishing (OIDC) — no API token
+# Publishes on a GitHub Release via PyPI Trusted Publishing (OIDC) - no API token
 # is stored anywhere. Cut a release on GitHub and this builds and uploads verivann.
 on:
   release:
@@ -11,7 +11,7 @@ jobs:
     name: Build and publish
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # the OIDC token PyPI trusts — this is what replaces an API token
+      id-token: write # the OIDC token PyPI trusts - this is what replaces an API token
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

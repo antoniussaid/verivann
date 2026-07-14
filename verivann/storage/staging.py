@@ -1,7 +1,7 @@
 """Staging writer.
 
 The public core writes ONLY into a configurable staging directory. It never
-touches any real private structure structure — the private layer picks artifacts up from
+touches any real private structure structure - the private layer picks artifacts up from
 here. Two artifacts per intake: a Markdown note and a JSON event.
 """
 

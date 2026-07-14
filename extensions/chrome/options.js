@@ -16,7 +16,7 @@ $('save').addEventListener('click', async () => {
   });
 
   // A custom endpoint (e.g. the LAN address) is outside the manifest's host
-  // permissions — ask for it explicitly, or the fetch would silently fail.
+  // permissions - ask for it explicitly, or the fetch would silently fail.
   try {
     const origin = new URL(endpoint).origin + '/*';
     const granted = await chrome.permissions.contains({ origins: [origin] });

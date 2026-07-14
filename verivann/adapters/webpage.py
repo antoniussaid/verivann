@@ -1,9 +1,9 @@
-"""Webpage adapter — fetch a URL, pull title + readable text.
+"""Webpage adapter - fetch a URL, pull title + readable text.
 
 It also pulls two things a reader never sees but a security scan needs
 (security.py): the text a page hides from the human eye (white-on-white,
 `display:none`, zero-size type, off-screen positioning) and the page's outbound
-links. Text that only a machine will read is not editorial content — it exists for
+links. Text that only a machine will read is not editorial content - it exists for
 a reason, and that reason belongs in the note.
 
 Degrades gracefully: on any network/parse failure it still returns a minimal
@@ -102,6 +102,6 @@ def _hidden_text(soup) -> str:
 def _fallback(url: str, error: str) -> Extracted:
     return Extracted(
         title=url,
-        text=f"[Extraction failed — process manually]\nURL: {url}\nReason: {error}",
+        text=f"[Extraction failed - process manually]\nURL: {url}\nReason: {error}",
         meta={"url": url, "error": error, "fallback": True},
     )

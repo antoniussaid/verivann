@@ -1,4 +1,4 @@
-"""Batch intake — digest a whole playlist / channel at once.
+"""Batch intake - digest a whole playlist / channel at once.
 
 Uses yt-dlp's flat listing to enumerate entries (no download), then runs each
 through the normal pipeline. Always bounded by `limit` so a channel with

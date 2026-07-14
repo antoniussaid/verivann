@@ -1,10 +1,10 @@
-"""Hybrid retrieval — the one search everything else calls.
+"""Hybrid retrieval - the one search everything else calls.
 
 Keyword search knows what you typed. Vector search knows what you meant. Neither
 is enough on its own: FTS5 misses the note that never used your word, embeddings
 miss the exact identifier you are hunting for.
 
-So both run, and the ranks are fused (reciprocal rank fusion — no score
+So both run, and the ranks are fused (reciprocal rank fusion - no score
 calibration to get wrong, and a note that both methods like rises above one that
 only one of them likes). With no embedder configured, this degrades to exactly
 what it was before: FTS5, honestly labeled.

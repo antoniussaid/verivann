@@ -33,7 +33,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 108
-target-version = "py310"  # the floor we support — not the version we develop on
+target-version = "py310"  # the floor we support - not the version we develop on
 
 [tool.ruff.lint]
 select = ["F", "E", "W", "I", "UP", "B", "SIM"]

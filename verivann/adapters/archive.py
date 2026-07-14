@@ -1,4 +1,4 @@
-"""Raw archive — a faithful offline snapshot of a page, via external tools.
+"""Raw archive - a faithful offline snapshot of a page, via external tools.
 
 Opt-in (`VERIVANN_ARCHIVE` truthy). A note is an interpretation; the archive is the
 evidence. Three formats, each from a tool that is *invoked*, never imported:
@@ -11,7 +11,7 @@ Because these are separate programs, their copyleft licenses do not reach Veriva
 own license: the user installs them, Verivann orchestrates them.
 
 Which formats are produced is `VERIVANN_ARCHIVE_FORMATS` (default "html"), e.g.
-"html,pdf,png". Missing tools are skipped silently — archiving never fails an
+"html,pdf,png". Missing tools are skipped silently - archiving never fails an
 intake.
 """
 
@@ -53,7 +53,7 @@ def available_tool() -> str | None:
 
 
 def chrome_binary() -> str | None:
-    """A headless-capable browser for pdf/png — already on nearly every machine."""
+    """A headless-capable browser for pdf/png - already on nearly every machine."""
     explicit = os.environ.get("VERIVANN_CHROME", "").strip()
     if explicit:
         return explicit if Path(explicit).is_file() else None
@@ -115,7 +115,7 @@ def archive_all(url: str, dest_dir: Path, stem: str) -> dict[str, str]:
     except OSError:
         return made
     # Headless Chrome resolves output paths against its own working directory,
-    # not ours — always hand it an absolute one.
+    # not ours - always hand it an absolute one.
     dest = dest_dir.resolve()
 
     if "pdf" in wanted:

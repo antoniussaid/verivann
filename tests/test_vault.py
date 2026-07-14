@@ -1,4 +1,4 @@
-"""Data sovereignty: back it up, export it readable, erase it clean — losing nothing
+"""Data sovereignty: back it up, export it readable, erase it clean - losing nothing
 you meant to keep and leaving nothing you meant to erase.
 """
 

@@ -1,4 +1,4 @@
-"""When it does not know, it should ask — once.
+"""When it does not know, it should ask - once.
 
 The router guesses. It has always guessed: low confidence, pick the best keyword
 match, move on, and the note quietly ends up in `inbox` where it dies. But the
@@ -8,8 +8,8 @@ keystroke.
     verivann clarify
 
 Every note whose routing was genuinely uncertain (confidence below the floor, or
-two open questions equally plausible) carries a pending question with 2–4 concrete
-options. `clarify` walks them: one keypress each. The answer re-routes the note —
+two open questions equally plausible) carries a pending question with 2-4 concrete
+options. `clarify` walks them: one keypress each. The answer re-routes the note -
 and, more importantly, becomes training signal exactly where it is worth the most,
 which is the case the router could not do on its own.
 
@@ -58,13 +58,13 @@ def uncertain(staging_dir: Path, domains: list[str], questions=None, limit: int 
             options.append(f"question:{q.id}")
             labels.append(f"evidence for “{q.text[:40]}”")
         options.append("drop")
-        labels.append("noise — drop it")
+        labels.append("noise - drop it")
         pending.append(
             Pending(
                 note_id=row["id"],
                 title=row["title"],
                 reason=(
-                    f"routed to `{row['domain']}` with confidence {row['confidence']} — a guess"
+                    f"routed to `{row['domain']}` with confidence {row['confidence']} - a guess"
                 ),
                 options=options,
                 labels=labels,
@@ -80,7 +80,7 @@ def answer(note_id: str, choice: str, staging_dir: Path) -> str:
     if choice == "drop":
         record_feedback(note_id, "dropped", staging_dir, origin="explicit")
         log_event("clarify", note_id, "dropped", staging_dir)
-        return "dropped — and the router now knows what that looked like"
+        return "dropped - and the router now knows what that looked like"
 
     if choice.startswith("question:"):
         question_id = int(choice.split(":", 1)[1])
@@ -97,4 +97,4 @@ def answer(note_id: str, choice: str, staging_dir: Path) -> str:
         con.close()
     record_feedback(note_id, "kept", staging_dir, origin="explicit")
     log_event("clarify", note_id, f"routed to {choice}", staging_dir)
-    return f"routed to `{choice}` — by you, so with full confidence"
+    return f"routed to `{choice}` - by you, so with full confidence"

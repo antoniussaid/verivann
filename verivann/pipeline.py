@@ -67,7 +67,7 @@ def _existing_id(ref: str, kind: str, config: Config) -> str | None:
 def _extract(kind: str, ref: str, text: str | None, subs_dir: Path) -> Extracted:
     if kind == "text":
         return extract_text(text or ref)
-    if kind == "file":  # a screenshot, a voice memo, a PDF — see adapters/local.py
+    if kind == "file":  # a screenshot, a voice memo, a PDF - see adapters/local.py
         from .adapters.local import extract_file
 
         return extract_file(Path(ref))
@@ -82,7 +82,7 @@ def _extract(kind: str, ref: str, text: str | None, subs_dir: Path) -> Extracted
             gallery = extract_gallery(ref, subs_dir)
             if gallery is not None:
                 return gallery  # gallery-dl present → images (+ OCR); else fall through
-        # Video platforms (TikTok, Instagram, X…) are JS apps — use yt-dlp for them.
+        # Video platforms (TikTok, Instagram, X…) are JS apps - use yt-dlp for them.
         return extract_media(ref, subs_dir) if _is_media_host(ref) else extract_webpage(ref)
     raise ValueError(f"unknown source kind: {kind}")
 
@@ -97,7 +97,7 @@ def run(
 ) -> IntakeResult:
     """Fetch the material, then judge it.
 
-    `extra_meta` is how a caller adds context the extractor cannot know — e.g. the
+    `extra_meta` is how a caller adds context the extractor cannot know - e.g. the
     watchlist handing over the diff of what this source used to say.
     """
     config = config or Config.load()
@@ -117,7 +117,7 @@ def run(
         if blocked:
             extracted = Extracted(
                 title=ref,
-                text=f"[Refused to fetch — {blocked}. This looks like an internal address.]",
+                text=f"[Refused to fetch - {blocked}. This looks like an internal address.]",
                 meta={"url": ref, "blocked": blocked, "fallback": True},
             )
             return judge(kind, ref, extracted, config, lens, note_id=None)
@@ -139,8 +139,8 @@ def judge(
     """Everything that happens AFTER the material is in hand.
 
     Split out from `run()` for one reason that turned out to matter: material that
-    was already fetched can be judged again — by a better model, with a different
-    lens — without going back to the network (see reanalyze.py). Nothing here
+    was already fetched can be judged again - by a better model, with a different
+    lens - without going back to the network (see reanalyze.py). Nothing here
     touches a source; it only reads what we already have.
     """
     config = config or Config.load()
@@ -149,7 +149,7 @@ def judge(
     # What is this material trying to do? Scanned BEFORE any model sees it: text
     # aimed at the analyzer (injection) downgrades trust to "hostile" and marks the
     # source permanently; sponsorships and affiliate funnels are surfaced above the
-    # summary. Offline, no model needed — see security.py.
+    # summary. Offline, no model needed - see security.py.
     meta = extracted.meta or {}
     injection = scan_injection(
         extracted.text,
@@ -174,7 +174,7 @@ def judge(
     llm, stayed_local, mode = mode_for(config, sensitivity)
     read_config = replace(config, llm=llm)
 
-    # Redaction happens HERE, on the way out — the analyzer sees the placeholder text,
+    # Redaction happens HERE, on the way out - the analyzer sees the placeholder text,
     # the library keeps the original, and the mapping never leaves this function.
     redaction = None
     material = extracted
@@ -192,7 +192,7 @@ def judge(
     extracted.meta["privacy_mode"] = mode
 
     # Learned relevance: what has this reader kept, what have they dropped?
-    # (Silent until enough verdicts exist — see relevance.MIN_SIGNAL.)
+    # (Silent until enough verdicts exist - see relevance.MIN_SIGNAL.)
     try:
         from .relevance import apply_profile, load_profile
 
@@ -204,7 +204,7 @@ def judge(
         material, read_config, lens=lens, preference=(profile.hint() if profile else "")
     )
     if redaction is not None:
-        # The model answered in placeholders. Put the truth back — locally.
+        # The model answered in placeholders. Put the truth back - locally.
         analysis.summary = redaction.restore(analysis.summary)
         analysis.reason = redaction.restore(analysis.reason)
         for field_name in ("useful_ideas", "claims_to_verify", "possible_actions"):
@@ -225,13 +225,13 @@ def judge(
     stem = artifact_stem(now.strftime("%Y-%m-%d"), kind, extracted.title, ref)
     target = str(config.staging_dir / "notes" / f"{stem}.md")
 
-    # Idempotency: the same source digested twice is the SAME note, re-read — not a
+    # Idempotency: the same source digested twice is the SAME note, re-read - not a
     # second one. The note file was always overwritten; the library used to grow a
     # duplicate row. Re-using the id keeps one row, one claim set, one verdict.
     note_id = note_id or _existing_id(ref, kind, config) or str(uuid.uuid4())
 
     # Optional raw archive of the page (opt-in; skipped for video-platform pages).
-    # The note is an interpretation — this is the evidence it was made from.
+    # The note is an interpretation - this is the evidence it was made from.
     if kind == "url" and not _is_media_host(ref):
         snapshots = archive_all(ref, config.staging_dir / "raw", stem)
         if snapshots:
@@ -255,9 +255,9 @@ def judge(
         pass
 
     # The real routing target: does this advance anything you are trying to find out?
-    # An empty answer is not a failure — it is the honest verdict that this material,
+    # An empty answer is not a failure - it is the honest verdict that this material,
     # whatever else it is, moved none of your open questions forward.
-    # NOTE: every model call below uses `read_config`, not `config` — the privacy
+    # NOTE: every model call below uses `read_config`, not `config` - the privacy
     # slot decision must hold for the whole intake, not just for the summary. A
     # side door is still a door.
     try:
@@ -285,7 +285,7 @@ def judge(
         pass
 
     # The canary came back (analysis/llm.py): the material did not merely TRY to give
-    # the analyzer orders — it succeeded. That is no longer a suspicion, and the note
+    # the analyzer orders - it succeeded. That is no longer a suspicion, and the note
     # and the source's record both say so in the strongest terms we have.
     if extracted.meta.get("hijacked"):
         injection = list(injection) + [
@@ -297,7 +297,7 @@ def judge(
         ]
         extracted.meta["injection"] = [vars(f) for f in injection]
 
-    # The source's own record — what it has been right about, wrong about, and
+    # The source's own record - what it has been right about, wrong about, and
     # whether it has ever tried to manipulate the analyzer. Read before the summary.
     source_key, source_label = identify(kind, ref, extracted)
     extracted.meta["source_key"] = source_key
@@ -333,7 +333,7 @@ def judge(
         config.staging_dir, stem, render_markdown(event, analysis), render_json(event)
     )
 
-    # Index into the searchable library + claim ledger (best-effort — never fail
+    # Index into the searchable library + claim ledger (best-effort - never fail
     # an intake over bookkeeping).
     try:
         from .library import index_claims, index_event, log_event

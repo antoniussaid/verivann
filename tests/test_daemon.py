@@ -59,7 +59,7 @@ def test_the_daemon_proposes_and_never_commits(monkeypatch, tmp_path):
     note = run("text", ref="text", text="an automation pipeline for local agents", config=config)
 
     run_once(config)
-    # The sweep is the only job that writes a verdict at all — and only for notes the
+    # The sweep is the only job that writes a verdict at all - and only for notes the
     # user has ignored for 30+ days. A fresh note is untouched.
     assert verdict_of(note.event.id, tmp_path) == ""
 

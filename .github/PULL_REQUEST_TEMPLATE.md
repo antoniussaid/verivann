@@ -1,4 +1,4 @@
-<!-- Thanks for the change! Keep the diff focused — one idea per PR. -->
+<!-- Thanks for the change! Keep the diff focused - one idea per PR. -->
 
 ## What this does
 
@@ -13,7 +13,7 @@
 - [ ] `ruff check .` is clean
 - [ ] `pytest -q` is green
 - [ ] Tests added or updated for the change (a bug fix carries a regression test)
-- [ ] Respects the invariants in [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) —
+- [ ] Respects the invariants in [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) -
       propose-only, untrusted-by-default, orchestrate-don't-bundle, local-first, no
       lock-in, non-configurable media policy
 - [ ] Docs / help text updated if behavior or commands changed

@@ -1,6 +1,6 @@
 """The download decision is the user's. These tests are the proof.
 
-This is not a preference toggle — it is where the legal architecture lives. Reading
+This is not a preference toggle - it is where the legal architecture lives. Reading
 a platform's published captions touches nothing. Fetching the media file touches the
 platform's terms, and that act must belong to the person who agreed to those terms,
 on their machine, under a setting they chose.
@@ -69,7 +69,7 @@ def test_an_unknown_mode_falls_back_to_the_safe_one(monkeypatch):
 def test_a_protected_platform_can_never_be_switched_on(monkeypatch):
     """The rule no setting overrides.
 
-    YouTube protects its media stream. Fetching it means circumventing that — and in
+    YouTube protects its media stream. Fetching it means circumventing that - and in
     the EU that is § 90c UrhG, which reaches the tool itself, not just the user. A
     user can consent to many things; they cannot consent us out of that. So: captions
     only, always, no matter what the config says.

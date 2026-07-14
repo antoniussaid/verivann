@@ -2,11 +2,11 @@
 
 For image hosts (Pinterest, imgur, flickr…) or direct image URLs. Downloads a
 bounded number of images, then OCRs them (tesseract) so the note carries any
-on-screen text — the useful part for a knowledge system. Activates only when
+on-screen text - the useful part for a knowledge system. Activates only when
 gallery-dl is available; otherwise the caller falls back.
 
 gallery-dl is invoked as a subprocess (binary or `python -m gallery_dl`), never
-imported — its GPL license stays with it.
+imported - its GPL license stays with it.
 """
 
 from __future__ import annotations
@@ -94,6 +94,6 @@ def extract_gallery(url: str, work_base: Path | None) -> Extracted | None:
 def _fallback(url: str, error: str) -> Extracted:
     return Extracted(
         title=url,
-        text=f"[Image extraction limited — process manually]\nURL: {url}\nReason: {error}",
+        text=f"[Image extraction limited - process manually]\nURL: {url}\nReason: {error}",
         meta={"url": url, "error": error, "fallback": True},
     )

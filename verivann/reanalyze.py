@@ -1,6 +1,6 @@
 """Reading it again, properly, once you finally have a model.
 
-Twenty-two notes sat in the library with `engine: heuristic` — which means nobody
+Twenty-two notes sat in the library with `engine: heuristic` - which means nobody
 had actually *read* them. They were fetched, routed by keyword count, and filed.
 And there was no way to fix that: the only path to an analysis went through a fresh
 fetch, and a fetch can fail, rate-limit, or return something different than it did
@@ -10,7 +10,7 @@ in March.
     verivann reanalyze --all        everything, e.g. after switching to a better model
     verivann reanalyze --lens critique
 
-So the material is judged again from what we already stored — the staged JSON event
+So the material is judged again from what we already stored - the staged JSON event
 holds the extraction verbatim. Nothing is re-fetched, no source is touched, and the
 note keeps its id, which means its verdicts, its highlights and its place in every
 ledger survive.
@@ -83,7 +83,7 @@ def reanalyze(
             extracted,
             config,
             lens=lens,
-            note_id=row["id"],  # the SAME note — verdicts and highlights must survive
+            note_id=row["id"],  # the SAME note - verdicts and highlights must survive
         )
         item = Redone(
             note_id=row["id"],
@@ -113,7 +113,7 @@ def _restore(event_path: str | None) -> Extracted | None:
 
 
 def _engine_of(note_id: str, config: Config) -> str:
-    """Which model actually answered — the chain may have fallen through to another."""
+    """Which model actually answered - the chain may have fallen through to another."""
     from .library import note_row
 
     row = note_row(note_id, config.staging_dir)

@@ -58,7 +58,7 @@ def test_sensitive_material_never_reaches_a_hosted_model_by_default():
     read_config, stayed_local = config_for(config, SENSITIVE)
 
     assert policy() == "strict"
-    assert read_config.llm.enabled is False  # nobody reads it — but nobody uploads it either
+    assert read_config.llm.enabled is False  # nobody reads it - but nobody uploads it either
     assert stayed_local is True
 
 

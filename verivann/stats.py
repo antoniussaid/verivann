@@ -2,7 +2,7 @@
 
 Every tool in this space is built to make you feel productive: look how much you
 saved, look at your beautiful graph. None of them will tell you the one number
-that matters — **how much of what you consumed survived contact with your own
+that matters - **how much of what you consumed survived contact with your own
 judgment.**
 
     verivann mirror     hours in, notes out, how many you kept, where the time went
@@ -53,7 +53,7 @@ class Mirror:
             return "Nothing digested in this period."
         if not self.judged:
             return (
-                f"{self.hours} h of material became {self.notes} notes — and you have judged "
+                f"{self.hours} h of material became {self.notes} notes - and you have judged "
                 "none of them. Nothing has been kept, nothing dropped: the library is a pile."
             )
         if self.kept == 0:

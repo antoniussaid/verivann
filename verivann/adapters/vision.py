@@ -1,4 +1,4 @@
-"""Visual extraction — OCR of images and video keyframes via external tools.
+"""Visual extraction - OCR of images and video keyframes via external tools.
 
 - `ocr_image`: tesseract (Apache-2.0) on an image → on-screen text.
 - `video_onscreen_text`: ffmpeg samples keyframes from a video, each is OCR'd.

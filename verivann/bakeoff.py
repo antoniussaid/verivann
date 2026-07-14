@@ -1,12 +1,12 @@
 """Two models read the same thing. You decide which one was right.
 
-We keep a permanent record of every *source* — right, wrong, manipulative. And
+We keep a permanent record of every *source* - right, wrong, manipulative. And
 `verivann calibrate` measures the *router* against your verdicts. The obvious next step
 was sitting there the whole time: **make the models compete.**
 
     verivann bakeoff --models llama-3.3-70b,gpt-4o-mini --notes 20
 
-Both models read the same stored material (no re-fetch, no network — reanalyze.py
+Both models read the same stored material (no re-fetch, no network - reanalyze.py
 already proved that works). Their proposals are recorded side by side. Then, as you
 judge those notes over the following days, `verivann bakeoff --results` tells you which
 model actually agreed with *you* more often, on *your* material, in *your* language.
@@ -124,7 +124,7 @@ def run(
 
 
 def results(config: Config | None = None) -> Result:
-    """Who was right — scored against the only ground truth there is: your verdicts."""
+    """Who was right - scored against the only ground truth there is: your verdicts."""
     config = config or Config.load()
     from .library import bakeoff_rows
 

@@ -1,4 +1,4 @@
-"""Who said it — and what their record is.
+"""Who said it - and what their record is.
 
 Every other tool treats a source as an address. Verivann treats it as a party with a
 history: a channel, a site, an author that has said things before, some of which
@@ -9,7 +9,7 @@ Two numbers, both computed from what the system already stores:
   record   hits and misses. A miss is written when one of this source's claims is
            later contradicted and the contradiction is resolved against it
            (see predictions.py / claims.py), or when it tried to manipulate the
-           analyzer (see security.py — that is a permanent mark).
+           analyzer (see security.py - that is a permanent mark).
 
   yield    how much came out of how much went in: usable ideas per 10 minutes of
            material. A 40-minute video with three ideas is a bad trade, and after
@@ -45,7 +45,7 @@ def identify_ref(kind: str, canonical: str) -> tuple[str, str]:
 def identify(kind: str, canonical: str, extracted: Extracted) -> tuple[str, str]:
     """The source's identity, using extractor metadata when we have it.
 
-    A channel is a source; the platform is not. `youtube:@3blue1brown` — not
+    A channel is a source; the platform is not. `youtube:@3blue1brown` - not
     `web:youtube.com`, which would lump every video on earth into one party.
     """
     meta = extracted.meta or {}
@@ -54,7 +54,7 @@ def identify(kind: str, canonical: str, extracted: Extracted) -> tuple[str, str]
 
     if uploader:
         handle = re.sub(r"\s+", "", uploader.lower())  # a backslash inside an f-string
-        if platform:                                   # breaks on Python < 3.12 — keep it out
+        if platform:                                   # breaks on Python < 3.12 - keep it out
             platform = platform.replace(":tab", "").replace("generic", "web")
             return f"{platform}:@{handle}", f"{uploader} ({platform})"
         return f"web:@{handle}", uploader
@@ -62,7 +62,7 @@ def identify(kind: str, canonical: str, extracted: Extracted) -> tuple[str, str]
 
 
 def material_minutes(extracted: Extracted) -> float:
-    """How much material this actually was — the denominator of `yield`."""
+    """How much material this actually was - the denominator of `yield`."""
     meta = extracted.meta or {}
     duration = meta.get("duration")
     if isinstance(duration, (int, float)) and duration > 0:
@@ -87,7 +87,7 @@ class Standing:
     dropped: int
     minutes: float
     ideas: int
-    analyzed: int  # notes an LLM actually read — a yield of 0 is meaningless without this
+    analyzed: int  # notes an LLM actually read - a yield of 0 is meaningless without this
     hits: int
     misses: int
     hostile: int
@@ -108,7 +108,7 @@ class Standing:
     def verdict(self) -> str:
         """One honest line, in the language a human would use."""
         if self.hostile:
-            return "tried to manipulate the analyzer — do not trust"
+            return "tried to manipulate the analyzer - do not trust"
         if self.misses and self.misses > self.hits:
             return f"has been wrong {self.misses}× (right {self.hits}×)"
         if self.hits and not self.misses:
@@ -120,9 +120,9 @@ class Standing:
             return f"you keep most of it ({self.kept}/{judged} kept)"
         rate = self.yield_per_10min
         if rate is not None and self.analyzed >= 3 and rate < 0.4:
-            return f"low yield ({rate}/10min) — a lot of material, little substance"
+            return f"low yield ({rate}/10min) - a lot of material, little substance"
         if not self.analyzed and self.notes >= 3:
-            return "never analyzed (no model configured) — yield unknown"
+            return "never analyzed (no model configured) - yield unknown"
         return "not enough signal yet"
 
     def yield_text(self) -> str:

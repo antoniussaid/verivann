@@ -1,7 +1,7 @@
 """What is allowed to leave this machine.
 
 We call ourselves local-first. Then we taught Verivann to read your screenshots, your
-voice memos and your PDFs — and if `VERIVANN_LLM=openai` is set, every one of them is
+voice memos and your PDFs - and if `VERIVANN_LLM=openai` is set, every one of them is
 shipped, in full, to somebody else's server. That is not local-first; that is a
 leak with good branding.
 
@@ -83,7 +83,7 @@ REDACTED = "redacted"  # sent to a hosted model, but stripped of what identifies
 
 
 def slot_for(config: Config, sensitivity: str) -> tuple[LLMConfig, bool]:
-    """Which model may read this — and whether the material stays on the machine.
+    """Which model may read this - and whether the material stays on the machine.
 
     Returns (llm, stayed_local). A disabled LLMConfig means: nobody may read it but
     the offline heuristic, and the note will say so rather than pretend.
@@ -94,17 +94,17 @@ def slot_for(config: Config, sensitivity: str) -> tuple[LLMConfig, bool]:
     if config.local_llm.enabled:
         return config.local_llm, True
     if policy() == "allow" and config.llm.enabled:
-        return config.llm, is_local(config.llm)  # your machine, your call — but it is on the record
+        return config.llm, is_local(config.llm)  # your machine, your call - but it is on the record
     return LLMConfig(), True  # strict, no local model: the heuristic, and an honest note
 
 
 def mode_for(config: Config, sensitivity: str) -> tuple[LLMConfig, bool, str]:
-    """(llm, stayed_local, mode) — the full decision, including redaction.
+    """(llm, stayed_local, mode) - the full decision, including redaction.
 
     Three ways sensitive material can be handled, and the user picks:
 
       local      a local model reads it; nothing leaves.
-      redacted   VERIVANN_REDACT=1 — identity is stripped locally, the MEANING is sent
+      redacted   VERIVANN_REDACT=1 - identity is stripped locally, the MEANING is sent
                  to the hosted model, and the note is restored on this machine.
       withheld   strict policy, no local model, no redaction: it is not uploaded, and
                  it is not read. The note says so instead of pretending.
@@ -140,21 +140,21 @@ def explain(
 
     if mode == REDACTED:
         return (
-            f"**Sensitive** ({why}) — analyzed by a hosted model **after local redaction**. "
+            f"**Sensitive** ({why}) - analyzed by a hosted model **after local redaction**. "
             f"{redaction} No local model is configured; you enabled VERIVANN_REDACT to get this "
             "material read at all. `verivann outbound` records what was sent."
         )
     if mode == "withheld" or not llm.enabled:
         return (
             f"**Sensitive** ({why}). No local model is configured and the policy is `strict`, "
-            "so this was NOT sent anywhere — it was routed by the offline heuristic and never "
+            "so this was NOT sent anywhere - it was routed by the offline heuristic and never "
             "properly read. Your options, in order of honesty: install a local model "
             "(VERIVANN_LOCAL_LLM), enable local redaction (VERIVANN_REDACT=1), or accept the upload "
             "explicitly (VERIVANN_PRIVACY=allow)."
         )
     if stayed_local:
-        return f"**Sensitive** ({why}). Analyzed by the local model — nothing left this machine."
+        return f"**Sensitive** ({why}). Analyzed by the local model - nothing left this machine."
     return (
-        f"**Sensitive** ({why}) — and VERIVANN_PRIVACY=allow, so the full text was sent to a hosted "
+        f"**Sensitive** ({why}) - and VERIVANN_PRIVACY=allow, so the full text was sent to a hosted "
         f"model ({llm.provider}:{llm.model}). This is on the record: `verivann outbound`."
     )

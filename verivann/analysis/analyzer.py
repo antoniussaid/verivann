@@ -1,10 +1,10 @@
-"""Analysis layer — relevance, routing, and (optionally) content digestion.
+"""Analysis layer - relevance, routing, and (optionally) content digestion.
 
 Two backends behind one `analyze()`:
-  - `heuristic_analyze` — offline keyword scoring. Transparent, free, no model.
+  - `heuristic_analyze` - offline keyword scoring. Transparent, free, no model.
     Fills routing only; content sections stay for review. This is the public
     default.
-  - the LLM backend (analysis/llm.py) — kicks in only when a model is configured
+  - the LLM backend (analysis/llm.py) - kicks in only when a model is configured
     (private LLMConfig). It also fills summary / ideas / claims / actions.
 
 Hard rule (contract): PROPOSE-ONLY. Neither backend ever proposes "memory".
@@ -37,7 +37,7 @@ class Analysis:
     predictions: list[dict] = field(default_factory=list)  # [{"text", "due"}]
     # How long each claim can be trusted before it should be re-checked (claims.py).
     shelf_life_days: int = 0  # 0 = unknown / not estimated
-    language: str = "en"  # what the MATERIAL is written in — the note answers in it
+    language: str = "en"  # what the MATERIAL is written in - the note answers in it
 
 
 def analyze(
@@ -45,7 +45,7 @@ def analyze(
 ) -> Analysis:
     """Dispatch to the LLM when configured, else the heuristic (with fallback).
 
-    `preference` is the learned-relevance hint (see relevance.py) — a mild prior,
+    `preference` is the learned-relevance hint (see relevance.py) - a mild prior,
     passed to the LLM only; the heuristic path is nudged by the caller instead.
     """
     lens = lens or getattr(config, "lens", None) or DEFAULT_LENS
@@ -74,7 +74,7 @@ def _matches(word: str, text: str) -> bool:
 
 _ENGLISH_KEYWORDS: dict[str, list[str]] = {
     # Writing the German list exposed how thin this one always was: it had no word for
-    # insurance, rent, pension or fees — the things people actually deal with.
+    # insurance, rent, pension or fees - the things people actually deal with.
     "finance": [
         "finance", "money", "invest", "budget", "cost", "price", "salary",
         "tax", "bank", "crypto", "insurance", "premium", "rent", "loan",

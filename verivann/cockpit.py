@@ -63,7 +63,7 @@ class Cockpit:
         if self.unanalyzed and self.unanalyzed == self.unjudged and self.unjudged:
             return (
                 f"{self.unjudged} note(s) sit unread and unjudged. No model is configured, "
-                "so nothing has actually been read — set VERIVANN_LLM before building more."
+                "so nothing has actually been read - set VERIVANN_LLM before building more."
             )
         if self.implied_drops:
             return (
@@ -71,7 +71,7 @@ class Cockpit:
                 "Your silence has judged them; confirm it with `verivann review`."
             )
         if self.stale_claims:
-            return f"{self.stale_claims} claim(s) are past their shelf life — what you believe may be old."
+            return f"{self.stale_claims} claim(s) are past their shelf life - what you believe may be old."
         if self.unjudged:
             return f"{self.unjudged} note(s) never judged. The router learns from nothing else."
         return "Nothing is due. The ledger is clean."

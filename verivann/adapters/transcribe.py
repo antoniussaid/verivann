@@ -1,11 +1,11 @@
-"""Local transcription fallback (Whisper) — opt-in, provider-neutral.
+"""Local transcription fallback (Whisper) - opt-in, provider-neutral.
 
 Runs ONLY when captions are absent AND `VERIVANN_WHISPER_MODEL` is set. Downloads
 the audio via yt-dlp and transcribes it. Two backends, tried in order:
   - faster-whisper (MIT, pip) if importable
   - whisper.cpp binary (MIT) via VERIVANN_WHISPER_CPP + VERIVANN_WHISPER_CPP_MODEL
 
-Heavy and slow on weak hardware — that's why it is opt-in. Any failure returns
+Heavy and slow on weak hardware - that's why it is opt-in. Any failure returns
 (None, None) so the pipeline degrades cleanly.
 """
 
@@ -60,7 +60,7 @@ def _download_audio(url: str, work: Path) -> Path | None:
 
 
 def transcribe_file(audio: Path) -> tuple[str | None, str | None]:
-    """Transcribe a local file — a voice memo, a recorded call, a lecture."""
+    """Transcribe a local file - a voice memo, a recorded call, a lecture."""
     if not enabled() or not audio.is_file():
         return None, None
     try:

@@ -1,4 +1,4 @@
-"""The mark — generated, not shipped as a binary.
+"""The mark - generated, not shipped as a binary.
 
 Verivann needs an app icon for the phone (PWA install) and the browser extension.
 Rather than commit binary assets, we draw it: a molten ingot on near-black, in

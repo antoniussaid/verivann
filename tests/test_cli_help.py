@@ -6,7 +6,7 @@ from verivann.cli import _GROUP_OF, app
 
 
 def test_every_command_and_subapp_is_grouped():
-    """No command may sit outside a help panel — a flat wall of 49 verbs is the thing
+    """No command may sit outside a help panel - a flat wall of 49 verbs is the thing
     this grouping exists to prevent, so a new ungrouped command should fail the build."""
     names = {c.name for c in app.registered_commands} | {g.name for g in app.registered_groups}
     ungrouped = sorted(n for n in names if n not in _GROUP_OF)

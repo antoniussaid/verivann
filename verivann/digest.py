@@ -1,4 +1,4 @@
-"""The ingot — a week, poured into one document.
+"""The ingot - a week, poured into one document.
 
 Not a newsletter and not a dashboard. A weekly digest that leads with what
 survived, then names what contradicted itself, what came due, what went stale, and
@@ -8,7 +8,7 @@ are the point.
     verivann digest              the last 7 days, to stdout
     verivann digest --days 30 --out week.md
 
-Also here: `verivann export anki` — cards, but ONLY from notes you kept. A tool that
+Also here: `verivann export anki` - cards, but ONLY from notes you kept. A tool that
 drills you on material you already decided was noise is worse than no tool.
 """
 
@@ -36,7 +36,7 @@ def digest(config: Config | None = None, days: int = 7) -> str:
     today = datetime.now(timezone.utc).date().isoformat()
 
     out: list[str] = [
-        f"# Verivann — the last {days} days",
+        f"# Verivann - the last {days} days",
         "",
         f"_{today}_",
         "",
@@ -54,14 +54,14 @@ def digest(config: Config | None = None, days: int = 7) -> str:
     out += ["", "## What survived", ""]
     if kept:
         for row in kept:
-            out.append(f"- **{row['title'][:70]}** — _{row['source']}_")
+            out.append(f"- **{row['title'][:70]}** - _{row['source']}_")
     else:
         out.append("_Nothing. You kept nothing this week._")
 
     if due:
         out += ["", "## Predictions that came due", ""]
         for p in due:
-            out.append(f"- `{p.due}` **{p.text}** — {p.source_label}")
+            out.append(f"- `{p.due}` **{p.text}** - {p.source_label}")
             out.append(f"  - judge it: `verivann resolve {p.id} --hit|--miss`")
 
     if stale:
@@ -73,7 +73,7 @@ def digest(config: Config | None = None, days: int = 7) -> str:
         out += ["", "## Where the time went", ""]
         for source, minutes, kept_count in m.time_sinks:
             share = f"{minutes:g} min → {kept_count} kept"
-            out.append(f"- {source} — {share}")
+            out.append(f"- {source} - {share}")
 
     if dropped:
         out += ["", "## The slag (what you threw away)", ""]
@@ -91,21 +91,21 @@ def digest(config: Config | None = None, days: int = 7) -> str:
 
 
 def anki(config: Config | None = None, limit: int = 200) -> str:
-    """Cards from notes you KEPT. Tab-separated: front, back, tags — Anki reads it directly."""
+    """Cards from notes you KEPT. Tab-separated: front, back, tags - Anki reads it directly."""
     config = config or Config.load()
     from .library import kept_rows
 
     lines: list[str] = ["#separator:tab", "#html:false", "#tags column:3"]
     for row in kept_rows(config.staging_dir, limit=limit):
         for idea in _ideas(row["note_path"]):
-            front = f"{row['title'][:90]} — what was the point?" if len(idea) > 120 else idea
+            front = f"{row['title'][:90]} - what was the point?" if len(idea) > 120 else idea
             back = idea if front != idea else row["title"]
             lines.append(f"{_clean(front)}\t{_clean(back)}\t{row['domain']}")
     return "\n".join(lines) + "\n"
 
 
 def _ideas(note_path: str) -> list[str]:
-    """The bullet list under the note's ideas heading — whatever the lens called it."""
+    """The bullet list under the note's ideas heading - whatever the lens called it."""
     try:
         text = Path(note_path).read_text(encoding="utf-8")
     except OSError:

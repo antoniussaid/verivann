@@ -6,7 +6,7 @@ thinking of. Embeddings do.
 
 Provider-neutral, like everything else: any OpenAI-compatible `/embeddings`
 endpoint (Ollama, OpenAI, LM Studio, OpenRouter). Vectors are stored as float32
-blobs next to the notes; ranking is hybrid — the keyword hit and the meaning hit
+blobs next to the notes; ranking is hybrid - the keyword hit and the meaning hit
 both count, because each catches what the other misses.
 
 Off by default. Without `VERIVANN_EMBED_MODEL` the library falls back to FTS5 and
@@ -32,7 +32,7 @@ def enabled(config: Config) -> bool:
 
 
 def embed_texts(texts: list[str], config: Config) -> list[list[float]]:
-    """One call per batch. Raises on failure — callers decide whether to care."""
+    """One call per batch. Raises on failure - callers decide whether to care."""
     vectors: list[list[float]] = []
     headers = {"content-type": "application/json"}
     if config.embed.api_key:
@@ -141,13 +141,13 @@ class SemDupe:
 
 
 def semantic_dupes(config: Config, threshold: float = 0.94) -> list[SemDupe]:
-    """Near-identical notes that URL-dedup can't catch — the same content re-posted.
+    """Near-identical notes that URL-dedup can't catch - the same content re-posted.
 
     This is the one guard that protects the whole credibility metric: without it, a
     piece syndicated across sites inflates a source's apparent corroboration. Pairs
     already unified by canon are skipped (URL-dedup owns them); the older note is the
-    keeper. `same_source` marks the safe case — one source under two URLs, fine to
-    merge automatically — versus a cross-source match, which is real corroboration to
+    keeper. `same_source` marks the safe case - one source under two URLs, fine to
+    merge automatically - versus a cross-source match, which is real corroboration to
     surface rather than silently collapse.
 
     Brute-force pairwise cosine. A personal library is small; this is fine (the same

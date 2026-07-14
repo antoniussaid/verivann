@@ -1,4 +1,4 @@
-"""Machine-readable JSON event — the exact contract shape."""
+"""Machine-readable JSON event - the exact contract shape."""
 
 from __future__ import annotations
 

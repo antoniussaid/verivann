@@ -1,11 +1,11 @@
 import { digest, kindOf, settings, verdict } from './shared.js';
 
 const LENSES = [
-  ['digest', 'digest — balanced'],
-  ['wisdom', 'wisdom — insights'],
-  ['critique', 'critique — weak points'],
-  ['study', 'study — key concepts'],
-  ['actions', 'actions — next steps'],
+  ['digest', 'digest - balanced'],
+  ['wisdom', 'wisdom - insights'],
+  ['critique', 'critique - weak points'],
+  ['study', 'study - key concepts'],
+  ['actions', 'actions - next steps'],
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -48,7 +48,7 @@ $('go').addEventListener('click', async () => {
     $('go').textContent = 'Digest again';
   } catch (err) {
     $('err').style.display = 'block';
-    $('err').textContent = `${err.message} — is \`verivann serve\` running?`;
+    $('err').textContent = `${err.message} - is \`verivann serve\` running?`;
     $('go').textContent = 'Digest';
   } finally {
     $('go').disabled = false;

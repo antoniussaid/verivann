@@ -8,7 +8,7 @@ later, it goes on the record: the claim, the date it comes due, and who said it.
 When the date arrives, Verivann asks you. Your verdict is written straight onto that
 source's permanent record (sources.py).
 
-Nothing here is automatic. Verivann does not decide who was right — that is a
+Nothing here is automatic. Verivann does not decide who was right - that is a
 judgment, and judgments belong to the human. What Verivann does is make forgetting
 impossible.
 
@@ -49,7 +49,7 @@ class Prediction:
 
     def line(self) -> str:
         when = (
-            f"due {self.due} — {abs(self.days_left)} day(s) overdue"
+            f"due {self.due} - {abs(self.days_left)} day(s) overdue"
             if self.is_due
             else f"due {self.due} (in {self.days_left} day(s))"
             if self.status == "open"
@@ -83,7 +83,7 @@ def listing(staging_dir: Path, status: str = "", due_only: bool = False) -> list
 def resolve(prediction_id: int, verdict: str, staging_dir: Path) -> Prediction | None:
     """Judge a prediction. hit/miss writes onto the source's record; void does not.
 
-    A prediction that never came true is not a rounding error — it is the whole
+    A prediction that never came true is not a rounding error - it is the whole
     point of keeping the ledger.
     """
     if verdict not in ("hit", "miss", "void"):

@@ -2,8 +2,8 @@
 
 An Obsidian note is a dead file: whatever it claimed on the day you saved it, it
 claims forever, with the same confidence, long after the world moved on. Verivann has
-a ledger — claims with a shelf life, predictions with a due date, sources with a
-record — so its notes have no excuse for being dead too.
+a ledger - claims with a shelf life, predictions with a due date, sources with a
+record - so its notes have no excuse for being dead too.
 
 `verivann refresh` walks every note something has happened to, and writes what
 happened at the top of it:
@@ -15,7 +15,7 @@ happened at the top of it:
     > - Its source has since been wrong 3× / tried to manipulate the analyzer
 
 The banner sits between two markers, so refreshing is idempotent: it is replaced,
-never stacked. The file stays plain Markdown — no database magic, no lock-in. If
+never stacked. The file stays plain Markdown - no database magic, no lock-in. If
 you delete Verivann tomorrow, the warning is still legible in your vault.
 """
 
@@ -51,7 +51,7 @@ class Alerts:
         for c in self.contradicted:
             lines.append(
                 f"> - **Contradicted.** A later source says: “{c['claim'][:110]}”  "
-                f"_(from {c['by_source']}, {c['at'][:10]} — {c['why'][:70]})_"
+                f"_(from {c['by_source']}, {c['at'][:10]} - {c['why'][:70]})_"
             )
         if self.expired:
             lines.append(
@@ -62,7 +62,7 @@ class Alerts:
             lines.append(f"> - **A prediction here did not come true:** “{m[:110]}”")
         if self.source_note:
             lines.append(f"> - **The source's record has changed:** {self.source_note}")
-        lines += [">", "> _This note was not rewritten — only this box was._", _END, ""]
+        lines += [">", "> _This note was not rewritten - only this box was._", _END, ""]
         return "\n".join(lines)
 
 

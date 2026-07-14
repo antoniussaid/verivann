@@ -1,18 +1,18 @@
-"""The one door to the outside — and the guard on it.
+"""The one door to the outside - and the guard on it.
 
 Verivann fetches URLs a user pasted, a page linked to, or a feed listed. Without a
 guard, a crafted link (or a redirect chain) could point the local server at
 `http://169.254.169.254/…` (cloud metadata), `http://127.0.0.1:…` (other local
-services), or a private-LAN host — a Server-Side Request Forgery. The server would
+services), or a private-LAN host - a Server-Side Request Forgery. The server would
 dutifully fetch it and hand the result back.
 
 So every server-side HTTP fetch goes through `safe_get`, which:
   * allows only http/https,
-  * resolves the host and refuses any IP that is not globally routable — a
+  * resolves the host and refuses any IP that is not globally routable - a
     default-deny check (`is_global`), not a blocklist of known-bad ranges, so
     CGNAT/shared address space (incl. some clouds' metadata) and future special
     ranges are refused too, not just loopback/private/link-local, and
-  * follows redirects **manually**, re-checking every hop — because a public URL
+  * follows redirects **manually**, re-checking every hop - because a public URL
     that 302s to `http://127.0.0.1` would otherwise slip straight through.
 
 Residual, documented: this does not defend against DNS rebinding (a host that
@@ -53,7 +53,7 @@ def _blocked_ip(ip: ipaddress._BaseAddress) -> str | None:
     # Default-DENY, not deny-by-enumeration: refuse anything that is not globally
     # routable. The named checks above stay only to give a precise reason for the
     # common cases; this line is the real guard, and it also stops the ranges the
-    # enumeration missed — CGNAT/shared address space (100.64.0.0/10, which holds
+    # enumeration missed - CGNAT/shared address space (100.64.0.0/10, which holds
     # Alibaba Cloud's metadata at 100.100.100.200), 6to4 relay (192.88.99.0/24),
     # benchmarking, and any future special-use range.
     if not getattr(ip, "is_global", False):
@@ -69,7 +69,7 @@ def _blocked_host(host: str) -> str | None:
     try:
         infos = socket.getaddrinfo(host, None)
     except socket.gaierror:
-        return None  # cannot resolve — let the HTTP client fail normally; not SSRF
+        return None  # cannot resolve - let the HTTP client fail normally; not SSRF
     for info in infos:
         addr = info[4][0].split("%", 1)[0]  # strip a zone id if present
         try:

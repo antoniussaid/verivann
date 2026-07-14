@@ -1,7 +1,7 @@
 """Data sovereignty: back it all up, export the readable notes, or erase it all.
 
 Verivann keeps everything in one folder you own. These three make that ownership
-real — a single portable archive you can move or keep, a plain folder of Markdown
+real - a single portable archive you can move or keep, a plain folder of Markdown
 with no database in the way, and a clean, total erase for when you want to walk away
 and leave nothing behind. Nothing here talks to a network; it is all your machine.
 """
@@ -12,7 +12,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
-_TRANSIENT = ".subs"  # scratch working dirs — never worth keeping
+_TRANSIENT = ".subs"  # scratch working dirs - never worth keeping
 
 
 def backup(staging_dir: Path, out_path: Path) -> Path:
@@ -39,7 +39,7 @@ def backup(staging_dir: Path, out_path: Path) -> Path:
 
 
 def export_notes(staging_dir: Path, out_dir: Path) -> int:
-    """Copy every note's Markdown into a plain folder — no database, no lock-in."""
+    """Copy every note's Markdown into a plain folder - no database, no lock-in."""
     notes = sorted((staging_dir / "notes").glob("*.md")) if (staging_dir / "notes").is_dir() else []
     out_dir.mkdir(parents=True, exist_ok=True)
     for note in notes:
