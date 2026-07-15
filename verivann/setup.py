@@ -32,7 +32,7 @@ class Preset:
 PRESETS: list[Preset] = [
     Preset("cloudflare", "Cloudflare Workers AI", True, False, True, True,
            "@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/baai/bge-base-en-v1.5",
-           "Free tier. If antonius.app runs on Cloudflare you already have an account + token."),
+           "Free tier. If you already use Cloudflare, you likely have an account and API token."),
     Preset("groq", "Groq", True, False, True, False,
            "llama-3.3-70b-versatile", "",
            "Free tier, very fast. Get a key at console.groq.com."),
