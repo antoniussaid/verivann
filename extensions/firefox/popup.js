@@ -19,8 +19,9 @@ let noteId = null;
   $('target').title = tabUrl;
 
   const { lens } = await settings();
-  $('lens').innerHTML = LENSES.map(([v, label]) =>
-    `<option value="${v}"${v === lens ? ' selected' : ''}>${label}</option>`).join('');
+  const lensSel = $('lens');
+  lensSel.textContent = '';
+  for (const [v, label] of LENSES) lensSel.add(new Option(label, v, v === lens, v === lens));
 
   if (!/^https?:/i.test(tabUrl)) {
     $('go').disabled = true;
@@ -35,13 +36,29 @@ $('go').addEventListener('click', async () => {
   try {
     const note = await digest({ value: tabUrl, kind: kindOf(tabUrl), lens: $('lens').value });
     noteId = note.id;
-    $('badges').style.display = 'flex';
-    $('badges').innerHTML =
-      `<span class="badge">domain <b>${note.domain}</b></span>` +
-      `<span class="badge">proposal <b>${note.action}</b></span>` +
-      `<span class="badge">conf <b>${note.confidence}</b></span>` +
-      (note.reingested ? '<span class="badge">re-read</span>' : '') +
-      '<span class="badge warn">unverified</span>';
+    const badges = $('badges');
+    badges.style.display = 'flex';
+    badges.textContent = '';
+    const badge = (label, value, cls) => {
+      const span = document.createElement('span');
+      span.className = cls ? `badge ${cls}` : 'badge';
+      if (value === undefined) {
+        span.textContent = label;
+      } else {
+        span.append(`${label} `);
+        const b = document.createElement('b');
+        b.textContent = value;
+        span.append(b);
+      }
+      badges.append(span);
+    };
+    // note.* comes from the local inbox response; build with textContent so the
+    // values can never be interpreted as markup
+    badge('domain', note.domain);
+    badge('proposal', note.action);
+    badge('conf', note.confidence);
+    if (note.reingested) badge('re-read');
+    badge('unverified', undefined, 'warn');
     $('reason').style.display = 'block';
     $('reason').textContent = note.reason;
     $('verdict').style.display = 'flex';
