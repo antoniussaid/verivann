@@ -1,4 +1,4 @@
-<!-- Thanks for the change! Keep the diff focused - one idea per PR. -->
+<!-- Thanks for the change! Keep the diff focused, one idea per PR. -->
 
 ## What this does
 

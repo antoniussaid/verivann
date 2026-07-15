@@ -56,14 +56,14 @@ obligated to respect the privacy and security of the reporter of any incident.
 Maintainers will follow these Community Impact Guidelines in determining the consequences
 for any action they deem in violation of this Code of Conduct:
 
-1. **Correction** - Community Impact: use of inappropriate language or other behavior
+1. **Correction**, Community Impact: use of inappropriate language or other behavior
    deemed unprofessional. Consequence: a private, written warning and clarity about the
    nature of the violation.
-2. **Warning** - Community Impact: a violation through a single incident or series of
+2. **Warning**, Community Impact: a violation through a single incident or series of
    actions. Consequence: a warning with consequences for continued behavior.
-3. **Temporary Ban** - Community Impact: a serious violation of community standards.
+3. **Temporary Ban**, Community Impact: a serious violation of community standards.
    Consequence: a temporary ban from any sort of interaction with the community.
-4. **Permanent Ban** - Community Impact: demonstrating a pattern of violation, harassment,
+4. **Permanent Ban**, Community Impact: demonstrating a pattern of violation, harassment,
    or aggression. Consequence: a permanent ban from any sort of public interaction.
 
 ## Attribution

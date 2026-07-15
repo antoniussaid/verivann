@@ -1,4 +1,4 @@
-"""First run - connect a model without reading the manual.
+"""First run, connect a model without reading the manual.
 
 Everything in Verivann works offline on a keyword heuristic, but a model is where it
 comes alive: summaries, claims, predictions, lenses, the credibility ledger. The
@@ -71,10 +71,10 @@ def compose_env(
     model: str = "",
     embed_model: str = "",
 ) -> dict[str, str]:
-    """The env vars for a chosen provider. Pure - no I/O, no prompting.
+    """The env vars for a chosen provider. Pure, no I/O, no prompting.
 
     The main slot (`VERIVANN_LLM`) reads everything. If the provider is local, it is
-    ALSO written as the privacy slot (`VERIVANN_LOCAL_LLM`) - otherwise sensitive
+    ALSO written as the privacy slot (`VERIVANN_LOCAL_LLM`), otherwise sensitive
     material (your files, IBANs, diagnoses) would fall to the heuristic instead of
     being read by the very local model you just configured.
     """
@@ -96,7 +96,7 @@ def compose_env(
         env["VERIVANN_EMBED_MODEL"] = chosen_embed
 
     if p.local:
-        # Nothing this provider sees ever leaves the machine - so it is also the safe
+        # Nothing this provider sees ever leaves the machine, so it is also the safe
         # home for sensitive material, and the privacy default is strict.
         env["VERIVANN_LOCAL_LLM"] = provider
         if chosen_model:
@@ -116,7 +116,7 @@ def verify_connection(llm) -> Probe:
     """One tiny model call, to prove the config actually reaches a model.
 
     A trusted, fixed prompt with no untrusted material (so the canary is off). Every
-    failure - wrong key, wrong model name, server down, rate limit - comes back as
+    failure, wrong key, wrong model name, server down, rate limit, comes back as
     `ok=False` with a short human reason. It never raises: the whole point is to turn
     a silent misconfiguration into an answer the newcomer can act on immediately.
     """
@@ -131,7 +131,7 @@ def verify_connection(llm) -> Probe:
             "ping",
             guard=False,
         )
-    except Exception as exc:  # noqa: BLE001 - report, never crash the wizard
+    except Exception as exc:  # noqa: BLE001, report, never crash the wizard
         return Probe(False, llm.model or "", _friendly_error(exc))
     return Probe(True, model, reply.strip()[:60] or "(connected; empty reply)")
 
@@ -142,31 +142,31 @@ def _friendly_error(exc: Exception) -> str:
     msg = str(exc)
     low = msg.lower()
     if any(s in msg for s in ("401", "403")) or "unauthor" in low or "forbidden" in low:
-        return "the API key was rejected - check the key and try again"
+        return "the API key was rejected, check the key and try again"
     if "404" in msg or "not found" in low or "not_found" in low:
-        return "that model or endpoint was not found - check the model name"
+        return "that model or endpoint was not found, check the model name"
     if "429" in msg or "rate" in low or "quota" in low:
-        return "rate-limited right now - the connection works, try again shortly"
+        return "rate-limited right now, the connection works, try again shortly"
     if any(s in low for s in ("connect", "refused", "resolve", "timed out", "timeout", "unreachable")):
-        return "could not reach the server - check the URL, or that it is running"
+        return "could not reach the server, check the URL, or that it is running"
     if "no model configured" in low:
         return "no model configured"
     return (msg[:140] or exc.__class__.__name__)
 
 
 def welcome_text() -> tuple[str, str]:
-    """A real, short piece for the newcomer's first note - so the inbox is never empty
+    """A real, short piece for the newcomer's first note, so the inbox is never empty
     and the whole pipeline (extract → analyze → note) proves itself end to end."""
     title = "Welcome to Verivann"
     text = (
         "Verivann turns anything you read, watch, or listen to into a short, honest note "
         "you actually own. It never posts, never phones home with your data, and never "
-        "commits a note to your knowledge base on its own - every note is a proposal until "
+        "commits a note to your knowledge base on its own, every note is a proposal until "
         "you accept it. It also does what a bookmark never could: it flags who profits from "
         "a source, catches instructions hidden inside the material that try to hijack the "
         "analysis, and keeps a running record of what each source has later turned out to be "
         "right or wrong about. This note was made by that same pipeline, just now, from this "
-        "very paragraph - proof that your model connection works."
+        "very paragraph, proof that your model connection works."
     )
     return title, text
 

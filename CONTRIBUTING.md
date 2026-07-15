@@ -1,7 +1,7 @@
 # Contributing to Verivann
 
 Thanks for looking. Verivann is a local-first intake router with a strong point of view,
-and the point of view is the product - so the most useful contributions respect a few
+and the point of view is the product, so the most useful contributions respect a few
 invariants rather than working around them. This page is short on purpose.
 
 ## Getting set up
@@ -16,7 +16,7 @@ python -m venv .venv
 pip install -e ".[dev]"
 ```
 
-Run the checks before you push - CI runs exactly these:
+Run the checks before you push, CI runs exactly these:
 
 ```bash
 ruff check .
@@ -28,7 +28,7 @@ network (both are mocked), so it runs anywhere in seconds.
 
 ## The invariants (please don't break these)
 
-These are not style preferences - they are what makes Verivann *Verivann*. A change that
+These are not style preferences, they are what makes Verivann *Verivann*. A change that
 crosses one of them will be asked to find another way.
 
 1. **Propose-only.** Nothing is ever written into your knowledge base automatically. The
@@ -43,7 +43,7 @@ crosses one of them will be asked to find another way.
    Verivann's release cycle. Always pass a user URL after `--`, and never `shell=True`.
 4. **Local-first, no phone-home.** No account, no telemetry, no required cloud. Anything
    that leaves the machine is opt-in, routed by the privacy layer, and shows up in
-   `vv outbound`. Sensitive material stays with the local model or the heuristic - it is
+   `vv outbound`. Sensitive material stays with the local model or the heuristic, it is
    never uploaded to earn a nicer summary.
 5. **No lock-in.** Notes are plain Markdown in a folder you own. `export`, `backup`, and
    `purge` must keep that promise literally true.
@@ -54,7 +54,7 @@ crosses one of them will be asked to find another way.
 ## Sending a change
 
 - Keep the diff focused; one idea per PR.
-- Add or update tests - a behavior worth adding is worth a test, and a bug worth fixing is
+- Add or update tests, a behavior worth adding is worth a test, and a bug worth fixing is
   worth a regression test.
 - Match the surrounding code: comment density, naming, and idiom. Comments explain *why*,
   not *what*.
@@ -63,8 +63,8 @@ crosses one of them will be asked to find another way.
 
 ## Reporting bugs and ideas
 
-- **Bugs / features:** open an issue - the templates ask for the few things that make a
+- **Bugs / features:** open an issue, the templates ask for the few things that make a
   report actionable (including your `vv doctor` output, which answers half of them).
-- **Security problems:** please do *not* open a public issue - see [SECURITY.md](SECURITY.md).
+- **Security problems:** please do *not* open a public issue, see [SECURITY.md](SECURITY.md).
 
 By contributing, you agree your work is licensed under the project's MIT license.

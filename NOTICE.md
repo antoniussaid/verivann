@@ -17,12 +17,12 @@ Verivann's runtime dependencies are all permissively licensed:
 
 Transitive dependencies (httpcore, anyio, certifi, click, rich, …) are MIT /
 BSD / Apache-2.0 / ISC, with the sole exception of `certifi` (Mozilla Public
-License 2.0) - a certificate bundle used unmodified, which imposes no obligation
+License 2.0), a certificate bundle used unmodified, which imposes no obligation
 beyond this notice.
 
 ## External tools (invoked, never bundled)
 
-Verivann *orchestrates* other programs - it calls them as separate processes and
+Verivann *orchestrates* other programs, it calls them as separate processes and
 never imports, links, ships, or mirrors them. The user installs whichever ones
 they want; Verivann only detects and uses what is present. Because they are
 separate programs, their licenses (including the copyleft ones below) do not
