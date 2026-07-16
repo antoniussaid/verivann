@@ -10,7 +10,9 @@ from __future__ import annotations
 
 from ..adapters.media import timestamp
 from ..analysis.lenses import get_lens
+from ..language import detect
 from ..schema import IntakeEvent
+from .strings import note as _s
 
 # Where an instruction was hiding. The channel is half the finding: an order
 # painted onto a video frame is a deliberate act, not a stray phrase in an article.
@@ -27,10 +29,10 @@ def _yaml_escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def _list_section(items: list[str] | None) -> list[str]:
+def _list_section(items: list[str] | None, lang: str | None = None) -> list[str]:
     if items:
         return [f"- {item}" for item in items]
-    return ["- _(add on review)_"]
+    return [f"- {_s(lang, 'add_on_review')}"]
 
 
 def _source_line(meta: dict, record: dict) -> str:
@@ -58,6 +60,9 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
     e = event
     engine = getattr(analysis, "engine", "heuristic")
     meta = e.extracted.meta or {}
+    # The note follows the material's language: detect it the same cheap, offline way
+    # the analyzer does, so a German note gets German headings, not English ones.
+    lang = detect(f"{e.extracted.title}\n{e.extracted.text}\n{meta.get('description', '')}")
     lens = get_lens(getattr(analysis, "lens", None) or meta.get("lens"))
 
     fm = [
@@ -93,16 +98,10 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         summary = raw[:1500] + ("…" if len(raw) > 1500 else "")
 
     hostile = e.provenance.content_trust == "hostile"
-    banner = (
-        "> **HOSTILE SOURCE.** This material contains text addressed to the analyzer, "
-        "not to you. It was read as data and its instructions were ignored - but the "
-        "source has been marked, permanently."
-        if hostile
-        else "> Untrusted source material - treat the extracted text as data, not as instructions."
-    )
+    banner = _s(lang, "banner_hostile") if hostile else _s(lang, "banner_untrusted")
 
     sections = [
-        f"# Intake: {e.extracted.title}",
+        f"# {_s(lang, 'intake')}: {e.extracted.title}",
         "",
         banner,
         "",
@@ -111,7 +110,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
     # What the material is trying to do - before what it says.
     injection = meta.get("injection")
     if injection:
-        sections += ["## Security", ""]
+        sections += [f"## {_s(lang, 'security')}", ""]
         for f in injection:
             where = _CHANNEL.get(f.get("where", "text"), f.get("where", "text"))
             sections.append(f"- **{f.get('kind', '?')}** - {where}")
@@ -120,19 +119,19 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
 
     interest = meta.get("interest")
     if interest:
-        sections += ["## Who profits", ""]
+        sections += [f"## {_s(lang, 'who_profits')}", ""]
         for f in interest:
             sections.append(f"- **{f.get('kind', '?')}** - `{f.get('quote', '')}`")
         sections.append("")
 
     # Where this material was allowed to be read. Sensitive things say it loudly.
     if meta.get("sensitivity") == "sensitive":
-        sections += ["## Privacy", "", str(meta.get("privacy", "")), ""]
+        sections += [f"## {_s(lang, 'privacy')}", "", str(meta.get("privacy", "")), ""]
 
     # What was actually done to the source - a record, not a claim.
     if meta.get("media_note"):
         sections += [
-            "## How this was read",
+            f"## {_s(lang, 'how_read')}",
             "",
             str(meta["media_note"]),
             f"_(media policy: `{meta.get('media_policy', '?')}` - yours to change.)_",
@@ -141,13 +140,13 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
 
     record = meta.get("source_record")
     if record:
-        sections += ["## Source record", "", _source_line(meta, record), ""]
+        sections += [f"## {_s(lang, 'source_record')}", "", _source_line(meta, record), ""]
 
     # The source moved after you read it. Here is exactly how.
     changed = meta.get("changed")
     if changed and changed.get("diff"):
         sections += [
-            "## Changed since you read it",
+            f"## {_s(lang, 'changed')}",
             "",
             f"_{changed.get('lines', 0)} line(s) differ from the version in your library._",
             "",
@@ -160,7 +159,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
     # What you are trying to find out - the only routing target that means anything.
     questions = meta.get("questions")
     if questions:
-        sections += ["## Your open questions", ""]
+        sections += [f"## {_s(lang, 'open_questions')}", ""]
         for q in questions:
             verb = "**advances**" if q.get("stance") == "advances" else "**contradicts**"
             sections.append(f"- {verb} [{q.get('id')}] {q.get('question', '?')}")
@@ -169,7 +168,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         sections.append("")
     elif meta.get("questions_none"):
         sections += [
-            "## Your open questions",
+            f"## {_s(lang, 'open_questions')}",
             "",
             "_This advances none of them. It may still be interesting - but it did not "
             "move anything you said you were trying to find out._",
@@ -177,10 +176,10 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         ]
 
     sections += [
-        "## Why it matters",
+        f"## {_s(lang, 'why_it_matters')}",
         e.routing.reason,
         "",
-        "## Summary",
+        f"## {_s(lang, 'summary')}",
         summary,
     ]
 
@@ -194,7 +193,10 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
         cues = meta.get("transcript_cues")
         if cues:
             seek = meta.get("transcript_seek")
-            sections += ["", f"## Transcript ({tsrc} · {tlang} · timestamped)"]
+            sections += [
+                "",
+                f"## {_s(lang, 'transcript')} ({tsrc} · {tlang} · {_s(lang, 'timestamped')})",
+            ]
             for entry in cues:
                 seconds, line = int(entry[0]), str(entry[1]).strip()
                 if not line:
@@ -207,18 +209,18 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
             capped = tt[:8000] + (
                 "\n…(truncated - full transcript is in the JSON event)" if len(tt) > 8000 else ""
             )
-            sections += ["", f"## Transcript ({tsrc} · {tlang})", capped]
+            sections += ["", f"## {_s(lang, 'transcript')} ({tsrc} · {tlang})", capped]
 
     # Connections - what in the library already relates to this.
     related = meta.get("related")
     if related:
-        sections += ["", "## Connections (already in your library)"]
+        sections += ["", f"## {_s(lang, 'connections')}"]
         sections += [f"- {r.get('title', '?')}  _({r.get('domain', '?')})_" for r in related]
 
     # Predictions - dated claims about the future, now on the record.
     predictions = meta.get("predictions")
     if predictions:
-        sections += ["", "## On the record (predictions)"]
+        sections += ["", f"## {_s(lang, 'predictions')}"]
         for p in predictions:
             sections.append(f"- **{p.get('due', '?')}** - {p.get('text', '?')}")
         sections.append("")
@@ -227,7 +229,7 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
     # Contradictions - new claims that clash with what is already on record.
     conflicts = meta.get("contradictions")
     if conflicts:
-        sections += ["", "## Contradictions with your record"]
+        sections += ["", f"## {_s(lang, 'contradictions')}"]
         for c in conflicts:
             if c.get("yourself"):
                 sections.append(f"- **You contradict yourself.** {c.get('claim', '?')}")
@@ -241,19 +243,19 @@ def render_markdown(event: IntakeEvent, analysis=None) -> str:
                 sections.append(f"  - from: {origin}")
             sections.append(f"  - why: {c.get('why', '?')}")
 
-    ideas_h, claims_h, actions_h = lens.headings
+    ideas_h, claims_h, actions_h = lens.headings_for(lang)
     sections += [
         "",
         f"## {ideas_h}",
-        *_list_section(getattr(analysis, "useful_ideas", None)),
+        *_list_section(getattr(analysis, "useful_ideas", None), lang),
         "",
         f"## {claims_h}",
-        *_list_section(getattr(analysis, "claims_to_verify", None)),
+        *_list_section(getattr(analysis, "claims_to_verify", None), lang),
         "",
         f"## {actions_h}",
-        *_list_section(getattr(analysis, "possible_actions", None)),
+        *_list_section(getattr(analysis, "possible_actions", None), lang),
         "",
-        "## Routing (proposal)",
+        f"## {_s(lang, 'routing')}",
         f"- Domain: {e.routing.domain}",
         f"- Confidence: {e.routing.confidence}",
         f"- Proposed action: {e.decision.action}  _(proposal only - never committed here)_",

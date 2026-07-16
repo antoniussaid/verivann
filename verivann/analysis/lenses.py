@@ -28,6 +28,16 @@ class Lens:
     guidance: str
     # Headings for the three lists, in note order: ideas / claims / actions.
     headings: tuple[str, str, str] = ("Useful ideas", "Claims to verify", "Possible actions")
+    # German headings, used when the material (and therefore the note) is German.
+    headings_de: tuple[str, str, str] = (
+        "Nützliche Ideen",
+        "Zu prüfende Behauptungen",
+        "Mögliche Aktionen",
+    )
+
+    def headings_for(self, lang: str | None) -> tuple[str, str, str]:
+        """The list headings in the note's language (English for anything but 'de')."""
+        return self.headings_de if lang == "de" else self.headings
 
 
 _LENSES: dict[str, Lens] = {
@@ -50,6 +60,7 @@ _LENSES: dict[str, Lens] = {
             "possible_actions = habits or practices the material implies."
         ),
         headings=("Insights", "Claims the insights rest on", "Habits to try"),
+        headings_de=("Einsichten", "Behauptungen, auf denen sie ruhen", "Gewohnheiten zum Ausprobieren"),
     ),
     "critique": Lens(
         name="critique",
@@ -64,6 +75,7 @@ _LENSES: dict[str, Lens] = {
             "not invent flaws."
         ),
         headings=("Weak points", "Unsupported claims", "What would settle it"),
+        headings_de=("Schwachstellen", "Unbelegte Behauptungen", "Was es klären würde"),
     ),
     "study": Lens(
         name="study",
@@ -75,6 +87,7 @@ _LENSES: dict[str, Lens] = {
             "possible_actions = exercises or practice steps to actually learn this."
         ),
         headings=("Key concepts", "Look these up", "Practice"),
+        headings_de=("Schlüsselkonzepte", "Zum Nachschlagen", "Übung"),
     ),
     "actions": Lens(
         name="actions",
@@ -87,6 +100,7 @@ _LENSES: dict[str, Lens] = {
             "really implies work."
         ),
         headings=("What changes a decision", "Assumptions to check", "Next actions"),
+        headings_de=("Was eine Entscheidung ändert", "Zu prüfende Annahmen", "Nächste Schritte"),
     ),
 }
 
