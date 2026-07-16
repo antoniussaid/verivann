@@ -16,9 +16,9 @@ from .pipeline import IntakeResult, run
 app = typer.Typer(
     add_completion=False,
     help=(
-        "Verivann - turn anything you read, watch, or hear into a short, honest note "
+        "Verivann, turn anything you read, watch, or hear into a short, honest note "
         "you own.\n\n"
-        "It never posts and never commits a note on its own - every note is a proposal "
+        "It never posts and never commits a note on its own, every note is a proposal "
         "until you accept it. Along the way it flags who profits from a source, catches "
         "material that tries to hijack the analysis, and keeps score of what each source "
         "later turns out to be right or wrong about.\n\n"
@@ -30,7 +30,7 @@ app = typer.Typer(
 
 @app.callback()
 def cockpit_default(ctx: typer.Context) -> None:
-    """With no command, Verivann shows what is due - not a menu of thirty verbs."""
+    """With no command, Verivann shows what is due, not a menu of thirty verbs."""
     if ctx.invoked_subcommand is not None:
         return
 
@@ -90,7 +90,7 @@ def setup_cmd() -> None:
     from .setup import PRESETS, compose_env, preset, write_env
 
     typer.echo("\n  Verivann setup\n")
-    typer.echo("  Everything works offline without a model - but a model is where it comes alive")
+    typer.echo("  Everything works offline without a model, but a model is where it comes alive")
     typer.echo("  (summaries, claims, predictions, the credibility ledger). Let's connect one.\n")
     typer.echo("  Providers (the free ones are first):\n")
     for i, p in enumerate(PRESETS, 1):
@@ -98,11 +98,11 @@ def setup_cmd() -> None:
         tag = "local · free" if p.local else tag
         typer.echo(f"    {i}) {p.label:<44} [{tag}]")
         typer.echo(f"       {p.hint}")
-    typer.echo(f"    {len(PRESETS) + 1}) Skip - run offline on the heuristic for now\n")
+    typer.echo(f"    {len(PRESETS) + 1}) Skip, run offline on the heuristic for now\n")
 
     choice = typer.prompt("  Which one", default=str(len(PRESETS) + 1))
     if not choice.isdigit() or int(choice) > len(PRESETS):
-        typer.echo("\n  No model configured - Verivann will run on the offline heuristic.")
+        typer.echo("\n  No model configured, Verivann will run on the offline heuristic.")
         typer.echo("  Re-run `verivann setup` any time. Opening the inbox…\n")
         _maybe_serve()
         return
@@ -115,7 +115,7 @@ def setup_cmd() -> None:
     values = compose_env(p.key, account=account, api_key=api_key, model=model)
     env_path = Path(".env")
     if env_path.is_file():
-        typer.echo(f"\n  {env_path} already exists - your model settings will be merged in.")
+        typer.echo(f"\n  {env_path} already exists, your model settings will be merged in.")
     write_env(env_path, values)
 
     shown = {k: (v if not k.endswith("API_KEY") else "•" * 8) for k, v in values.items()}
@@ -137,18 +137,18 @@ def setup_cmd() -> None:
     probe = verify_connection(Config.load().llm)
     if not probe.ok:
         typer.echo(f"  ⚠ Could not reach the model: {probe.detail}")
-        typer.echo("    Your .env is saved - fix the setting above and re-run `verivann doctor`.\n")
+        typer.echo("    Your .env is saved, fix the setting above and re-run `verivann doctor`.\n")
         _maybe_serve()
         return
 
-    typer.echo(f"  ✓ Connected - {probe.model} answered.")
+    typer.echo(f"  ✓ Connected, {probe.model} answered.")
     # Cold-start reward: a real first note, so the inbox opens with something in it.
     typer.echo("  Making your first note so the inbox isn't empty…")
     try:
         _, text = welcome_text()
         first = run("text", ref="text", text=text)
         typer.echo(f"  ✓ First note ready: {first.event.extracted.title[:60]}")
-    except Exception as exc:  # noqa: BLE001 - the connection is proven; a note hiccup is minor
+    except Exception as exc:  # noqa: BLE001, the connection is proven; a note hiccup is minor
         typer.echo(f"  (Skipped the sample note: {str(exc)[:80]})")
     typer.echo("\n  Done. Check it any time with `verivann doctor`.\n")
     _maybe_serve()
@@ -193,7 +193,7 @@ def ingest_any_file(
     path: Path = typer.Argument(..., exists=True, readable=True, help="Image, audio, PDF, EPUB or text."),
     lens: str = _LENS_OPT,
 ) -> None:
-    """Digest a file on disk - screenshot (OCR), voice memo (Whisper), PDF, EPUB, text."""
+    """Digest a file on disk, screenshot (OCR), voice memo (Whisper), PDF, EPUB, text."""
     from .adapters.local import SUPPORTED
 
     if path.suffix.lower() in SUPPORTED:
@@ -218,7 +218,7 @@ def folder_cmd(
         typer.echo(f"  {len(batch)} new file(s) digested.\n")
 
     if keep_watching:
-        typer.echo(f"  watching {folder} - Ctrl+C to stop\n")
+        typer.echo(f"  watching {folder}, Ctrl+C to stop\n")
         try:
             watch(folder, recursive=recursive, lens=lens, on_batch=report)
         except KeyboardInterrupt:
@@ -232,7 +232,7 @@ def folder_cmd(
     report(batch)
 
 
-import_app = typer.Typer(help="Bring in what you already have - and judge it.")
+import_app = typer.Typer(help="Bring in what you already have, and judge it.")
 app.add_typer(import_app, name="import")
 
 
@@ -246,7 +246,7 @@ def _run_import(candidates, limit: int, dry_run: bool, lens: str | None) -> None
     if dry_run:
         for c in candidates[:limit]:
             typer.echo(f"    {c.title[:44] or c.ref[:44]:<44} {c.hint}")
-        typer.echo(f"\n  (dry run - nothing was digested. Drop --dry-run to import up to {limit}.)")
+        typer.echo(f"\n  (dry run, nothing was digested. Drop --dry-run to import up to {limit}.)")
         return
 
     def report(candidate, result) -> None:
@@ -261,7 +261,7 @@ def _run_import(candidates, limit: int, dry_run: bool, lens: str | None) -> None
     if outcome.domains:
         spread = ", ".join(f"{n}× {d}" for d, n in sorted(outcome.domains.items(), key=lambda x: -x[1]))
         typer.echo(f"  routed: {spread}")
-    typer.echo("  Now judge them - `verivann list`, then `verivann keep|drop <id>`.")
+    typer.echo("  Now judge them: `verivann list`, then `verivann keep|drop <id>`.")
 
 
 @import_app.command("urls")
@@ -271,7 +271,7 @@ def import_urls_cmd(
     dry_run: bool = typer.Option(False, "--dry-run"),
     lens: str = _LENS_OPT,
 ) -> None:
-    """Import every URL in a file (any export format - we just take the links)."""
+    """Import every URL in a file (any export format, we just take the links)."""
     from .importer import from_urls
 
     _run_import(from_urls(path), limit, dry_run, lens)
@@ -284,7 +284,7 @@ def import_obsidian_cmd(
     dry_run: bool = typer.Option(False, "--dry-run"),
     lens: str = _LENS_OPT,
 ) -> None:
-    """Import an Obsidian vault. It is read, never written to - and treated as sensitive."""
+    """Import an Obsidian vault. It is read, never written to, and treated as sensitive."""
     from .importer import from_obsidian
 
     _run_import(from_obsidian(vault), limit, dry_run, lens)
@@ -308,7 +308,7 @@ def import_history_cmd(
     _run_import(candidates, limit, dry_run, lens)
 
 
-question_app = typer.Typer(help="Your open questions - the real routing target.")
+question_app = typer.Typer(help="Your open questions, the real routing target.")
 app.add_typer(question_app, name="question")
 
 
@@ -331,7 +331,7 @@ def question_list_cmd(
 
     rows = listing(include_answered=all_questions)
     if not rows:
-        typer.echo("(no questions - `verivann question add \"...\"`)")
+        typer.echo("(no questions: `verivann question add \"...\"`)")
         return
     for q in rows:
         typer.echo(f"  {q.line()}\n")
@@ -339,7 +339,7 @@ def question_list_cmd(
 
 @question_app.command("answer")
 def question_answer_cmd(question_id: int = typer.Argument(...)) -> None:
-    """Everything you gathered on one question, synthesized - with the gaps named."""
+    """Everything you gathered on one question, synthesized, with the gaps named."""
     from .questions import answer
 
     result = answer(question_id)
@@ -352,18 +352,18 @@ def question_answer_cmd(question_id: int = typer.Argument(...)) -> None:
             typer.echo(f"  {line}")
         typer.echo("")
     if not result.sources:
-        typer.echo("  (no evidence gathered yet - digest material that speaks to it)")
+        typer.echo("  (no evidence gathered yet, digest material that speaks to it)")
         return
     typer.echo("  Sources:")
     for i, (title, source) in enumerate(result.sources, 1):
-        typer.echo(f"    [{i}] {title[:56]}  - {source[:26]}")
+        typer.echo(f"    [{i}] {title[:56]}, {source[:26]}")
     if not result.answer:
-        typer.echo("\n  (no LLM configured - evidence only. Set VERIVANN_LLM for the synthesis.)")
+        typer.echo("\n  (no LLM configured, evidence only. Set VERIVANN_LLM for the synthesis.)")
 
 
 @question_app.command("close")
 def question_close_cmd(question_id: int = typer.Argument(...)) -> None:
-    """Mark a question answered - it stops competing for new material."""
+    """Mark a question answered, it stops competing for new material."""
     from .questions import close
 
     typer.echo("  closed." if close(question_id) else f"(no question with id {question_id})")
@@ -377,7 +377,7 @@ def question_remove_cmd(question_id: int = typer.Argument(...)) -> None:
     typer.echo("  removed." if remove(question_id) else f"(no question with id {question_id})")
 
 
-feed_app = typer.Typer(help="Feeds - read for you, filtered by what you actually keep.")
+feed_app = typer.Typer(help="Feeds, read for you, filtered by what you actually keep.")
 app.add_typer(feed_app, name="feed")
 
 
@@ -391,12 +391,12 @@ def feed_add_cmd(url: str = typer.Argument(..., help="RSS or Atom URL.")) -> Non
 
 @feed_app.command("list")
 def feed_list_cmd() -> None:
-    """Your feeds - and the share of their output that ever passes your filter."""
+    """Your feeds, and the share of their output that ever passes your filter."""
     from .feeds import subscriptions
 
     rows = subscriptions()
     if not rows:
-        typer.echo("(no feeds - `verivann feed add <url>`)")
+        typer.echo("(no feeds: `verivann feed add <url>`)")
         return
     for row in rows:
         seen, passed = row["seen"] or 0, row["passed"] or 0
@@ -418,7 +418,7 @@ def feed_run_cmd(lens: str = _LENS_OPT) -> None:
     for result in results:
         total_seen += result.seen
         total_passed += len(result.passed)
-        typer.echo(f"\n  {result.feed[:60]}  -  {len(result.passed)}/{result.seen} got through")
+        typer.echo(f"\n  {result.feed[:60]},  {len(result.passed)}/{result.seen} got through")
         for item in result.passed:
             typer.echo(f"     [{item.domain:<8}] {item.title[:56]}")
             typer.echo(f"        {item.reason[:70]}")
@@ -427,7 +427,7 @@ def feed_run_cmd(lens: str = _LENS_OPT) -> None:
     mode = results[0].filter
     if mode == "untrained":
         typer.echo(
-            f"\n  {total_seen} item(s) read, {total_passed} shown - but the filter is UNTRAINED."
+            f"\n  {total_seen} item(s) read, {total_passed} shown, but the filter is UNTRAINED."
         )
         typer.echo(
             "  Verivann has no basis for an editorial opinion yet, so it is not pretending to have one.\n"
@@ -466,7 +466,7 @@ def serve_cmd(
     token: str = typer.Option("", help="Token for LAN mode (generated if omitted)."),
     no_open: bool = typer.Option(False, "--no-open", help="Don't open the browser."),
 ) -> None:
-    """Open the inbox: paste, share or right-click a link - see the digested note.
+    """Open the inbox: paste, share or right-click a link, see the digested note.
 
     With --lan it also listens on your local network, so the phone's share sheet can
     reach it (install the page as an app). LAN mode always requires a token.
@@ -474,7 +474,7 @@ def serve_cmd(
     from .web import serve
 
     serve(
-        host="0.0.0.0" if lan else host,  # noqa: S104 - deliberate, and token-gated
+        host="0.0.0.0" if lan else host,  # noqa: S104, deliberate, and token-gated
         port=port,
         open_browser=not no_open,
         token=token or None,
@@ -491,9 +491,9 @@ def ingest_batch_cmd(
 
     entries = list_entries(url, limit)
     if not entries:
-        typer.echo("(no entries found - is it a playlist/channel? is yt-dlp installed?)")
+        typer.echo("(no entries found, is it a playlist/channel? is yt-dlp installed?)")
         return
-    typer.echo(f"  {len(entries)} entr(ies) found - digesting…\n")
+    typer.echo(f"  {len(entries)} entr(ies) found, digesting…\n")
     for result in ingest_batch(url, limit):
         e = result.event
         typer.echo(f"  [{e.routing.domain}] {e.extracted.title[:60]}  → {e.decision.action}")
@@ -504,7 +504,7 @@ def search_cmd(
     query: str = typer.Argument(..., help="Search everything you've digested."),
     limit: int = typer.Option(10, help="Max results."),
 ) -> None:
-    """Search the library - by word, and (with an embedder) by meaning."""
+    """Search the library, by word, and (with an embedder) by meaning."""
     from .retrieval import retrieve
 
     found = retrieve(query, Config.load(), limit)
@@ -518,7 +518,7 @@ def search_cmd(
             typer.echo(f"     …{h.snippet[:160]}")
         typer.echo("")
     if found.engine == "fts":
-        typer.echo("  (keyword search only - set VERIVANN_EMBED_MODEL to also search by meaning)")
+        typer.echo("  (keyword search only, set VERIVANN_EMBED_MODEL to also search by meaning)")
 
 
 @app.command("reindex")
@@ -528,7 +528,7 @@ def reindex_cmd() -> None:
 
     cfg = Config.load()
     if not enabled(cfg):
-        typer.echo("  no embedder configured - set VERIVANN_EMBED_MODEL (e.g. nomic-embed-text on Ollama).")
+        typer.echo("  no embedder configured, set VERIVANN_EMBED_MODEL (e.g. nomic-embed-text on Ollama).")
         raise typer.Exit(1)
     typer.echo(f"  embedding with {cfg.embed.model}…")
     typer.echo(f"  {reindex(cfg)} note(s) indexed.")
@@ -561,7 +561,7 @@ def accept_cmd(
     note_id: str = typer.Argument(..., help="Note id (a prefix is enough)."),
     to: Path = typer.Option(None, "--to", help="Target folder (or set VERIVANN_ACCEPT_DIR)."),
 ) -> None:
-    """Accept a proposal - copy the note into a real folder. The one committing act."""
+    """Accept a proposal, copy the note into a real folder. The one committing act."""
     from .accept import accept, default_target
 
     target = to or default_target()
@@ -574,7 +574,7 @@ def accept_cmd(
         raise typer.Exit(1)
     typer.echo(f"  accepted: {result.title[:60]}")
     typer.echo(f"  written : {result.target}")
-    typer.echo("  (marked kept - the router learns from this)")
+    typer.echo("  (marked kept, the router learns from this)")
 
 
 @app.command("digest")
@@ -582,7 +582,7 @@ def digest_cmd(
     days: int = typer.Option(7, help="Period to pour."),
     out: Path = typer.Option(None, "--out", help="Write to a file instead of the screen."),
 ) -> None:
-    """The week, poured into one document - starting with what survived."""
+    """The week, poured into one document, starting with what survived."""
     from .digest import digest
 
     text = digest(Config.load(), days)
@@ -598,7 +598,7 @@ def export_cmd(
     target: str = typer.Argument("notes", help="What to export: notes | anki"),
     out: Path = typer.Option(None, "--out", help="Output folder (notes) or file (anki)."),
 ) -> None:
-    """Export your data - the readable notes, or Anki cards from what you kept."""
+    """Export your data, the readable notes, or Anki cards from what you kept."""
     config = Config.load()
     if target == "notes":
         from .vault import export_notes
@@ -607,7 +607,7 @@ def export_cmd(
         n = export_notes(config.staging_dir, dest)
         typer.echo(f"  {n} note(s) → {dest}{os.sep}")
         if not n:
-            typer.echo("  (nothing digested yet - run `verivann ingest-url/-text …` first)")
+            typer.echo("  (nothing digested yet, run `verivann ingest-url/-text …` first)")
         return
     if target == "anki":
         from .digest import anki
@@ -618,9 +618,9 @@ def export_cmd(
         cards = max(0, len(text.strip().splitlines()) - 3)
         typer.echo(f"  {cards} card(s) → {dest}")
         if not cards:
-            typer.echo("  (nothing kept yet, or no LLM has extracted ideas - cards come from kept notes)")
+            typer.echo("  (nothing kept yet, or no LLM has extracted ideas, cards come from kept notes)")
         return
-    typer.echo("  Unknown target - use 'notes' or 'anki'.")
+    typer.echo("  Unknown target, use 'notes' or 'anki'.")
     raise typer.Exit(1)
 
 
@@ -644,7 +644,7 @@ def purge_cmd(
     yes: bool = typer.Option(False, "--yes", help="Skip the confirmation prompt."),
     do_backup: bool = typer.Option(True, "--backup/--no-backup", help="Write a safety .zip first."),
 ) -> None:
-    """Erase your data - one source, or everything. Irreversible; backs up first by default."""
+    """Erase your data, one source, or everything. Irreversible; backs up first by default."""
     config = Config.load()
     if bool(source) == everything:  # neither, or both
         typer.echo("  Choose exactly one: --source <key> OR --all.")
@@ -652,7 +652,7 @@ def purge_cmd(
 
     what = "your ENTIRE library" if everything else f"source '{source}'"
     if not yes and not typer.confirm(f"  Permanently erase {what}? This cannot be undone."):
-        typer.echo("  Cancelled - nothing was touched.")
+        typer.echo("  Cancelled, nothing was touched.")
         return
 
     if do_backup:
@@ -674,12 +674,12 @@ def purge_cmd(
 
 @app.command("claims")
 def claims_cmd(limit: int = typer.Option(30, help="Max claims to show.")) -> None:
-    """The claim ledger - what your sources assert (needs an LLM to populate)."""
+    """The claim ledger, what your sources assert (needs an LLM to populate)."""
     from .library import all_claims
 
     rows = all_claims(Config.load().staging_dir, limit)
     if not rows:
-        typer.echo("(no claims on record - claims are extracted by the LLM analyzer)")
+        typer.echo("(no claims on record, claims are extracted by the LLM analyzer)")
         return
     for claim, src in rows:
         typer.echo(f"  • {claim}")
@@ -688,12 +688,12 @@ def claims_cmd(limit: int = typer.Option(30, help="Max claims to show.")) -> Non
 
 @app.command("stale")
 def stale_cmd(limit: int = typer.Option(20, help="Max claims to show.")) -> None:
-    """Claims whose shelf life has run out - what you believe may no longer be true."""
+    """Claims whose shelf life has run out, what you believe may no longer be true."""
     from .library import stale_claims
 
     rows = stale_claims(Config.load().staging_dir, limit)
     if not rows:
-        typer.echo("(nothing has gone stale - or no claims carry a shelf life yet)")
+        typer.echo("(nothing has gone stale, or no claims carry a shelf life yet)")
         return
     for row in rows:
         typer.echo(f"  • {row['claim']}")
@@ -716,7 +716,7 @@ def ask_cmd(question: str = typer.Argument(..., help="Ask your own digested note
     for i, h in enumerate(res.hits[:5], 1):
         typer.echo(f"  [{i}] {h.title}  ({h.source_ref[:60]})")
     if not res.answer:
-        typer.echo("\n(no LLM configured - matches only. Set VERIVANN_LLM to get an answer.)")
+        typer.echo("\n(no LLM configured, matches only. Set VERIVANN_LLM to get an answer.)")
 
 
 watch_app = typer.Typer(help="Watch sources for silent edits.")
@@ -730,7 +730,7 @@ def watch_add(url: str = typer.Argument(..., help="URL to keep under observation
 
     entry = add(url)
     typer.echo(f"  watching: {entry.label[:60]}")
-    typer.echo("  baseline taken - `verivann watch run` will report what moves.")
+    typer.echo("  baseline taken: `verivann watch run` will report what moves.")
 
 
 @watch_app.command("list")
@@ -740,7 +740,7 @@ def watch_list() -> None:
 
     rows = watched()
     if not rows:
-        typer.echo("(nothing under observation - `verivann watch add <url>`)")
+        typer.echo("(nothing under observation: `verivann watch add <url>`)")
         return
     for w in rows:
         moved = f"last changed {w.last_changed[:16]} ({w.changes}×)" if w.changes else "no change yet"
@@ -761,7 +761,7 @@ def watch_run(lens: str = _LENS_OPT) -> None:
         typer.echo(f"\n  CHANGED ({lines} line(s)): {url}")
         for line in patch.splitlines()[:12]:
             typer.echo(f"    {line}")
-    typer.echo(f"\n  {len(moved)} source(s) changed - the notes now carry the diff.")
+    typer.echo(f"\n  {len(moved)} source(s) changed, the notes now carry the diff.")
 
 
 @watch_app.command("remove")
@@ -777,19 +777,19 @@ def predictions_cmd(
     due: bool = typer.Option(False, "--due", help="Only what has come due."),
     status: str = typer.Option("", help="Filter: open | hit | miss | void."),
 ) -> None:
-    """Claims about the future, on the record - with the date they come due."""
+    """Claims about the future, on the record, with the date they come due."""
     from .predictions import listing
 
     items = listing(Config.load().staging_dir, status=status, due_only=due)
     if not items:
-        typer.echo("(nothing on the record - predictions are extracted by the LLM analyzer)")
+        typer.echo("(nothing on the record, predictions are extracted by the LLM analyzer)")
         return
     for p in items:
         marker = "!" if p.is_due else " "
         typer.echo(f"  {marker} {p.line()}\n")
     overdue = sum(1 for p in items if p.is_due)
     if overdue:
-        typer.echo(f"  {overdue} prediction(s) have come due - judge them: verivann resolve <id> --hit|--miss")
+        typer.echo(f"  {overdue} prediction(s) have come due, judge them: verivann resolve <id> --hit|--miss")
 
 
 @app.command("resolve")
@@ -797,7 +797,7 @@ def resolve_cmd(
     prediction_id: int = typer.Argument(..., help="Prediction id (see `verivann predictions`)."),
     hit: bool = typer.Option(False, "--hit", help="It came true."),
     miss: bool = typer.Option(False, "--miss", help="It did not."),
-    void: bool = typer.Option(False, "--void", help="Unjudgeable - no mark on the source."),
+    void: bool = typer.Option(False, "--void", help="Unjudgeable, no mark on the source."),
 ) -> None:
     """Judge a prediction. hit/miss goes onto that source's permanent record."""
     from .predictions import resolve
@@ -814,20 +814,20 @@ def resolve_cmd(
         raise typer.Exit(1)
     typer.echo(f"  {chosen[0].upper()}: {item.text[:70]}")
     if chosen[0] == "void":
-        typer.echo("  (no mark written - the source's record is unchanged)")
+        typer.echo("  (no mark written, the source's record is unchanged)")
         return
     from .library import source_standing
 
     standing = source_standing(item.source_key, cfg.staging_dir)
     if standing:
         typer.echo(
-            f"  {item.source_label}: {standing['hits']} right / {standing['misses']} wrong - on the record."
+            f"  {item.source_label}: {standing['hits']} right / {standing['misses']} wrong, on the record."
         )
 
 
 @app.command("sources")
 def sources_cmd(limit: int = typer.Option(20, help="Max sources to show.")) -> None:
-    """The standing of every source you have digested - record, yield, verdict."""
+    """The standing of every source you have digested, record, yield, verdict."""
     from .sources import standings
 
     rows = standings(Config.load().staging_dir, limit)
@@ -858,16 +858,16 @@ def dedupe_cmd(
     for title, count in merged:
         typer.echo(f"  merged {count} duplicate(s) into: {title[:60]}")
     if not merged:
-        typer.echo("  nothing to merge by URL - every source is already unique.")
+        typer.echo("  nothing to merge by URL, every source is already unique.")
 
     if semantic:
         _dedupe_semantic(config)
-    typer.echo("\n  (note files on disk were not touched - only the library index)")
+    typer.echo("\n  (note files on disk were not touched, only the library index)")
 
 
 def _dedupe_semantic(config: Config) -> None:
     """Merge same-source reposts automatically; surface cross-source echoes, never
-    collapse them - two sources saying the same thing is corroboration, not a dupe."""
+    collapse them, two sources saying the same thing is corroboration, not a dupe."""
     from .embed import enabled as embed_on
     from .embed import semantic_dupes
 
@@ -891,7 +891,7 @@ def _dedupe_semantic(config: Config) -> None:
 
     echoes = [d for d in dupes if not d.same_source]
     if echoes:
-        typer.echo("\n  Same content from a DIFFERENT source - left intact (that is corroboration,")
+        typer.echo("\n  Same content from a DIFFERENT source, left intact (that is corroboration,")
         typer.echo("  not a duplicate) but flagged so you know it is not independent:")
         for d in echoes[:10]:
             typer.echo(f"    {d.score}  {d.keeper_title[:38]}  ~  {d.dupe_title[:38]}")
@@ -899,13 +899,13 @@ def _dedupe_semantic(config: Config) -> None:
 
 @app.command("keep")
 def keep_cmd(note_id: str = typer.Argument(..., help="Note id (a prefix is enough).")) -> None:
-    """Mark a staged note as worth keeping - the router learns from it."""
+    """Mark a staged note as worth keeping, the router learns from it."""
     _feedback(note_id, "kept")
 
 
 @app.command("drop")
 def drop_cmd(note_id: str = typer.Argument(..., help="Note id (a prefix is enough).")) -> None:
-    """Mark a staged note as noise - the router learns from it. (Nothing is deleted.)"""
+    """Mark a staged note as noise, the router learns from it. (Nothing is deleted.)"""
     _feedback(note_id, "dropped")
 
 
@@ -916,15 +916,15 @@ def _feedback(note_id: str, verdict: str) -> None:
     cfg = Config.load()
     hit = record_feedback(note_id, verdict, cfg.staging_dir)
     if hit is None:
-        typer.echo(f"(no staged note with id starting '{note_id}' - see `verivann list`)")
+        typer.echo(f"(no staged note with id starting '{note_id}', see `verivann list`)")
         raise typer.Exit(1)
     typer.echo(f"  {verdict}: {hit.title[:60]}  [{hit.domain}]")
     profile = load_profile(cfg.staging_dir)
     if profile.active:
-        typer.echo(f"  profile: {profile.n_kept} kept / {profile.n_dropped} dropped - routing adapts.")
+        typer.echo(f"  profile: {profile.n_kept} kept / {profile.n_dropped} dropped, routing adapts.")
     else:
         typer.echo(
-            f"  profile: {profile.judged}/{MIN_SIGNAL} verdicts - not enough signal to steer routing yet."
+            f"  profile: {profile.judged}/{MIN_SIGNAL} verdicts, not enough signal to steer routing yet."
         )
 
 
@@ -949,7 +949,7 @@ def review_cmd(
     typer.echo(f"\n  {len(items)} note(s) you have never judged and never opened again.")
 
     if not sweep:
-        typer.echo("  `verivann review --sweep` records them as dropped (weakly - a shrug, not a verdict).")
+        typer.echo("  `verivann review --sweep` records them as dropped (weakly, a shrug, not a verdict).")
         typer.echo("  Rescue any of them with `verivann keep <id>`; that always wins over an inferred drop.")
         return
     count = run_sweep(cfg.staging_dir, days)
@@ -966,7 +966,7 @@ def counter_cmd(
     from .counter import counter
 
     if not available():
-        typer.echo("  no search backend - set VERIVANN_SEARCH_URL (SearXNG) or VERIVANN_SEARCH_KEY (Brave).")
+        typer.echo("  no search backend, set VERIVANN_SEARCH_URL (SearXNG) or VERIVANN_SEARCH_KEY (Brave).")
         typer.echo("  Verivann does not scrape engines whose terms forbid it.")
         raise typer.Exit(1)
 
@@ -992,7 +992,7 @@ def counter_cmd(
 
 @app.command("clarify")
 def clarify_cmd() -> None:
-    """The router guessed. Ask it to stop guessing - one keypress per note."""
+    """The router guessed. Ask it to stop guessing, one keypress per note."""
     from .interview import answer, uncertain
     from .questions import listing
 
@@ -1035,7 +1035,7 @@ def alloy_cmd(
     typer.echo(f"  engine      : {result.engine}")
     typer.echo(f"  note        : {result.note_path}")
     if result.engine == "assembly":
-        typer.echo("\n  (no model configured - the sources were placed side by side, not synthesized.)")
+        typer.echo("\n  (no model configured, the sources were placed side by side, not synthesized.)")
 
 
 @app.command("refresh")
@@ -1067,7 +1067,7 @@ def resurface_cmd(limit: int = typer.Option(5, help="How many.")) -> None:
 
     items = resurface(limit=limit)
     if not items:
-        typer.echo("  nothing forgotten is relevant right now - or nothing is old enough to be forgotten.")
+        typer.echo("  nothing forgotten is relevant right now, or nothing is old enough to be forgotten.")
         return
     for item in items:
         typer.echo(f"  {item.line()}")
@@ -1102,7 +1102,7 @@ def daemon_cmd(
             typer.echo("  nothing was due.")
         return
 
-    typer.echo("  Verivann daemon - feeds, watchlist, living notes. Ctrl+C to stop.")
+    typer.echo("  Verivann daemon, feeds, watchlist, living notes. Ctrl+C to stop.")
     typer.echo("  (It never asks and never commits: everything it does is a proposal.)\n")
     try:
         serve(cfg, interval=interval, on_job=report)
@@ -1121,7 +1121,7 @@ def reanalyze_cmd(
 
     cfg = Config.load()
     if not (cfg.llm.enabled or cfg.local_llm.enabled):
-        typer.echo("  no model configured - re-reading would just repeat the heuristic.")
+        typer.echo("  no model configured, re-reading would just repeat the heuristic.")
         typer.echo("  `verivann models` shows the free options.")
         raise typer.Exit(1)
 
@@ -1129,7 +1129,7 @@ def reanalyze_cmd(
     if not todo:
         typer.echo("  every note has already been read by a model.")
         return
-    typer.echo(f"  {len(todo)} note(s) to re-read (from stored material - no source is touched).\n")
+    typer.echo(f"  {len(todo)} note(s) to re-read (from stored material, no source is touched).\n")
 
     def report(item) -> None:
         typer.echo(
@@ -1157,7 +1157,7 @@ def bakeoff_cmd(
             typer.echo("  give at least two models: --models a,b")
             raise typer.Exit(1)
         if not cfg.llm.enabled:
-            typer.echo("  no model endpoint configured - `verivann models` shows the free options.")
+            typer.echo("  no model endpoint configured: `verivann models` shows the free options.")
             raise typer.Exit(1)
 
         typer.echo(f"  {', '.join(chosen)} will each read the same stored notes (no re-fetch).\n")
@@ -1169,7 +1169,7 @@ def bakeoff_cmd(
 
     standings = results(cfg)
     if not standings.contenders:
-        typer.echo("  no bake-off has been run - `verivann bakeoff --models a,b`")
+        typer.echo("  no bake-off has been run: `verivann bakeoff --models a,b`")
         return
     typer.echo("")
     for c in sorted(standings.contenders, key=lambda x: (x.accuracy or 0), reverse=True):
@@ -1180,7 +1180,7 @@ def bakeoff_cmd(
 
 @app.command("models")
 def models_cmd() -> None:
-    """The model slots - and the free ways to fill them."""
+    """The model slots, and the free ways to fill them."""
     from .adapters.search import backend as search_backend
     from .privacy import policy
     from .redact import enabled as redact_on
@@ -1195,7 +1195,7 @@ def models_cmd() -> None:
     typer.echo(f"    privacy  : {policy()}{'  + local redaction' if redact_on() else ''}")
 
     typer.echo("""
-  Free ways to fill them (all OpenAI-compatible - Verivann speaks that everywhere)
+  Free ways to fill them (all OpenAI-compatible, Verivann speaks that everywhere)
 
     cloudflare   you already have an account if antonius.app runs on it.
                  VERIVANN_LLM=cloudflare
@@ -1266,7 +1266,7 @@ def calibrate_cmd() -> None:
 
 @app.command("log")
 def log_cmd(limit: int = typer.Option(25, help="How far back.")) -> None:
-    """The furnace log - every act, in order. Nothing here is ever rewritten."""
+    """The furnace log, every act, in order. Nothing here is ever rewritten."""
     from .library import event_rows
 
     rows = event_rows(Config.load().staging_dir, limit)
@@ -1350,7 +1350,7 @@ def outbound_cmd(days: int = typer.Option(30, help="Look back this many days."))
         )
     chars, cost = outbound_total(cfg.staging_dir, days)
     if cfg.price_per_mtok:
-        typer.echo(f"\n  estimated cost : €{cost:.4f}  (at €{cfg.price_per_mtok}/Mtok, chars÷4 - an estimate)")
+        typer.echo(f"\n  estimated cost : €{cost:.4f}  (at €{cfg.price_per_mtok}/Mtok, chars÷4, an estimate)")
     else:
         typer.echo(f"\n  {chars} characters sent. Set VERIVANN_PRICE_PER_MTOK to see what it cost.")
     typer.echo("")
@@ -1358,12 +1358,12 @@ def outbound_cmd(days: int = typer.Option(30, help="Look back this many days."))
 
 @app.command("slag")
 def slag_cmd(limit: int = typer.Option(30, help="Max entries.")) -> None:
-    """The anti-library - everything you dropped. The negative image of your taste."""
+    """The anti-library, everything you dropped. The negative image of your taste."""
     from .stats import slag
 
     rows = slag(Config.load().staging_dir, limit)
     if not rows:
-        typer.echo("(you have dropped nothing yet - which is itself a finding)")
+        typer.echo("(you have dropped nothing yet, which is itself a finding)")
         return
     for s in rows:
         typer.echo(f"  {s.id[:8]}  [{s.domain:<8}] {s.title[:50]}")
@@ -1372,7 +1372,7 @@ def slag_cmd(limit: int = typer.Option(30, help="Max entries.")) -> None:
 
 @app.command("bias")
 def bias_cmd(topic: str = typer.Argument(..., help="A topic you think you understand.")) -> None:
-    """Where your own material agrees with itself - and who dissents."""
+    """Where your own material agrees with itself, and who dissents."""
     from .bias import bias
 
     split = bias(topic, Config.load())
@@ -1383,16 +1383,16 @@ def bias_cmd(topic: str = typer.Argument(..., help="A topic you think you unders
         typer.echo(f"\n  your material converges on:\n    \"{split.thesis}\"\n")
     typer.echo(f"  supporting ({len(split.support)}):")
     for title, source in split.support:
-        typer.echo(f"     · {title[:50]}  - {source[:28]}")
+        typer.echo(f"     · {title[:50]}, {source[:28]}")
     if split.dissent:
         typer.echo(f"\n  dissenting ({len(split.dissent)}):")
         for title, source in split.dissent:
-            typer.echo(f"     · {title[:50]}  - {source[:28]}")
+            typer.echo(f"     · {title[:50]}, {source[:28]}")
     if split.blind_spot:
         typer.echo(f"\n  what is missing:\n    {split.blind_spot}")
     typer.echo(f"\n  {split.verdict()}\n")
     if split.engine == "inventory-only":
-        typer.echo("  (no LLM configured - this is an inventory, not an audit. Set VERIVANN_LLM.)")
+        typer.echo("  (no LLM configured, this is an inventory, not an audit. Set VERIVANN_LLM.)")
 
 
 @app.command("doctor")
@@ -1437,9 +1437,9 @@ def doctor() -> None:
     from .embed import enabled as embed_on
     from .privacy import policy
     typer.echo(
-        f"  meaning search : {cfg.embed.model if embed_on(cfg) else 'off (keyword only - set VERIVANN_EMBED_MODEL)'}"
+        f"  meaning search : {cfg.embed.model if embed_on(cfg) else 'off (keyword only, set VERIVANN_EMBED_MODEL)'}"
     )
-    typer.echo(f"  local slot     : {cfg.local_llm.model or 'none - sensitive material stays unread, not uploaded'}")
+    typer.echo(f"  local slot     : {cfg.local_llm.model or 'none, sensitive material stays unread, not uploaded'}")
     typer.echo(f"  privacy        : {policy()}")
     typer.echo(f"  counter-search : {search_backend() or 'off (set VERIVANN_SEARCH_URL or VERIVANN_SEARCH_KEY)'}")
     try:
@@ -1454,7 +1454,7 @@ def doctor() -> None:
         state = "steering routing" if profile.active else "dormant (needs more verdicts)"
         due = [p for p in predictions(cfg.staging_dir) if p.is_due]
         typer.echo(f"  library        : {library_count(cfg.staging_dir)} note(s) indexed")
-        typer.echo(f"  learned        : {profile.n_kept} kept / {profile.n_dropped} dropped - {state}")
+        typer.echo(f"  learned        : {profile.n_kept} kept / {profile.n_dropped} dropped, {state}")
         typer.echo(f"  questions      : {len(questions(cfg))} open")
         typer.echo(f"  predictions    : {len(due)} due to be judged")
         typer.echo(f"  feeds          : {len(subscriptions(cfg))} followed")
@@ -1465,7 +1465,7 @@ def doctor() -> None:
 
 @app.command("list")
 def list_intakes(limit: int = typer.Option(20, help="Max notes to show.")) -> None:
-    """List staged intake notes - with the id that `keep` / `drop` take."""
+    """List staged intake notes, with the id that `keep` / `drop` take."""
     from .library import recent, verdict_of
 
     cfg = Config.load()
@@ -1491,18 +1491,18 @@ def list_intakes(limit: int = typer.Option(20, help="Max notes to show.")) -> No
 # Set here, in one place, rather than sprinkled across 49 decorators.
 _COMMAND_GROUPS: dict[str, list[str]] = {
     "Start here": ["setup", "serve", "doctor"],
-    "Capture - get material in": [
+    "Capture, get material in": [
         "ingest-text", "ingest-url", "ingest-youtube", "ingest-file", "ingest-batch",
         "folder", "import",
     ],
-    "Decide - the human gate": ["list", "review", "accept", "keep", "drop", "resurface"],
+    "Decide, the human gate": ["list", "review", "accept", "keep", "drop", "resurface"],
     "Ask & challenge": [
         "ask", "search", "question", "counter", "alloy", "clarify", "trace", "bias",
     ],
     "Sources & claims": [
         "sources", "claims", "stale", "predictions", "resolve", "watch", "feed", "refresh",
     ],
-    "Insight - what it all adds up to": [
+    "Insight, what it all adds up to": [
         "mirror", "calibrate", "models", "bakeoff", "profile", "log", "outbound",
         "digest", "lenses",
     ],
@@ -1529,7 +1529,7 @@ _apply_help_panels()
 
 
 def _load_dotenv() -> None:
-    """Load a local .env (never committed) so config - incl. the LLM - is picked up."""
+    """Load a local .env (never committed) so config, incl. the LLM, is picked up."""
     path = Path(".env")
     if not path.is_file():
         return
