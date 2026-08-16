@@ -480,8 +480,19 @@ def _is_extension_origin(origin: str) -> bool:
     return bool(origin) and origin.startswith(_EXTENSION_PREFIXES)
 
 
-def is_authorized(origin: str, given_token: str, configured_token: str) -> bool:
-    if _is_extension_origin(origin):
+def is_authorized(
+    origin: str, given_token: str, configured_token: str, exposed: bool = False
+) -> bool:
+    """Token first. An origin may only ever be an ADDITIONAL restriction, never a grant.
+
+    The extension exemption holds on loopback, where the premise is true: a web page
+    cannot forge `Origin`, because the browser sets it. It does NOT hold once we listen
+    on the network - for `curl -H 'Origin: chrome-extension://x'` an origin is one flag,
+    and granting on it alone handed the whole library (and `/intake`) to anyone on the
+    LAN. On `--lan` the token is the only thing that counts; the extension already sends
+    it (extensions/*/shared.js sets `x-verivann-token`).
+    """
+    if _is_extension_origin(origin) and not exposed:
         return True
     if not configured_token:
         return True  # only when explicitly run without a token
@@ -495,6 +506,7 @@ def cors_origin(origin: str) -> str | None:
 
 class _Handler(BaseHTTPRequestHandler):
     token = ""  # set by serve(); empty = loopback, no auth
+    exposed = False  # set by serve(); True once we listen beyond loopback (--lan)
 
     # ---------- plumbing ----------
 
@@ -533,7 +545,7 @@ class _Handler(BaseHTTPRequestHandler):
         given = self.headers.get("x-verivann-token", "")
         if not given and "token=" in self.path:
             given = self.path.split("token=", 1)[1].split("&", 1)[0]
-        return is_authorized(self.headers.get("origin", ""), given, self.token)
+        return is_authorized(self.headers.get("origin", ""), given, self.token, self.exposed)
 
     def do_OPTIONS(self) -> None:  # noqa: N802 - CORS preflight from the extension
         self._send(204, b"", "text/plain")
@@ -756,11 +768,13 @@ def serve(
     exposed = host not in _LOOPBACK
     # A token is ALWAYS required - even on loopback. Any website the user visits can
     # reach 127.0.0.1, so the token is what keeps a web page out of the library. The
-    # page picks it up from the URL we open; the browser extension is trusted by its
-    # origin and needs no token.
+    # page picks it up from the URL we open. On loopback the extension is additionally
+    # trusted by its origin (a web page cannot forge it) - but NOT once we are exposed:
+    # off the loopback an Origin header is just a header, so there only the token counts.
     if not token:
         token = secrets.token_urlsafe(12)
     _Handler.token = token
+    _Handler.exposed = exposed
 
     server = ThreadingHTTPServer((host, port), _Handler)
     suffix = f"?token={token}"

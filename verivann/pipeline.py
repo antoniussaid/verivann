@@ -200,10 +200,19 @@ def judge(
     except Exception:  # noqa: BLE001 - the profile is an optimization, never a requirement
         profile = None
 
-    analysis = analyze(
-        material, read_config, lens=lens, preference=(profile.hint() if profile else "")
-    )
+    # The learned hint is distilled from material the reader kept - which can include
+    # sensitive material. In the redacted mode it must not ride along to a hosted model.
+    hint = (profile.hint() if profile else "") if mode != REDACTED else ""
+    analysis = analyze(material, read_config, lens=lens, preference=hint)
     if redaction is not None:
+        # The canary is set on whatever object the analyzer was handed - here that is
+        # the redacted COPY. Mirror it back, or the one path that sends sensitive
+        # material to a stranger is the one path without a guard.
+        if material.meta.get("hijacked"):
+            extracted.meta["hijacked"] = material.meta["hijacked"]
+        # Keep the placeholder form for every model call that still follows. Restoring
+        # first and passing the result on is how plaintext leaves through a side door.
+        redacted_claims = list(analysis.claims_to_verify)
         # The model answered in placeholders. Put the truth back - locally.
         analysis.summary = redaction.restore(analysis.summary)
         analysis.reason = redaction.restore(analysis.reason)
@@ -212,6 +221,8 @@ def judge(
                 analysis, field_name,
                 [redaction.restore(item) for item in getattr(analysis, field_name)],
             )
+    else:
+        redacted_claims = list(analysis.claims_to_verify)
     if profile is not None and analysis.engine == "heuristic":
         analysis = apply_profile(analysis, extracted, profile)  # LLM runs get hint() instead
     extracted.meta["lens"] = analysis.lens
@@ -264,7 +275,9 @@ def judge(
         from .questions import listing as open_questions
         from .questions import match as match_questions
 
-        matches = match_questions(extracted, note_id, read_config)
+        # `material`, never `extracted`: in the redacted mode the latter still holds the
+        # plaintext, and this is a model call like any other. A side door is still a door.
+        matches = match_questions(material, note_id, read_config)
         if matches:
             extracted.meta["questions"] = matches
         elif read_config.llm.enabled and open_questions(read_config):
@@ -277,7 +290,7 @@ def judge(
         from .claims import check_contradictions
 
         conflicts = check_contradictions(
-            analysis.claims_to_verify, read_config, config.staging_dir, exclude_note=note_id
+            redacted_claims, read_config, config.staging_dir, exclude_note=note_id
         )
         if conflicts:
             extracted.meta["contradictions"] = conflicts

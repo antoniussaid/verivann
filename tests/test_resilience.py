@@ -172,6 +172,95 @@ def test_a_sensitive_file_is_uploaded_only_after_redaction(monkeypatch, tmp_path
     assert result.event.extracted.meta["privacy_mode"] == "redacted"
 
 
+def test_no_request_of_a_redacted_intake_carries_the_plaintext(monkeypatch, tmp_path):
+    """EVERY body, not just the last one.
+
+    The older test kept `sent["body"] = ...` and so only ever inspected the FINAL
+    request. Two later model calls (the open-questions match and the contradiction
+    check) were handed the unredacted material and the restored claims - and the test
+    stayed green, because in its fixture those paths never fired. A guard that can only
+    see the last call is not a guard.
+    """
+    monkeypatch.setenv("VERIVANN_REDACT", "1")
+    bodies: list[str] = []
+
+    def capture(url, headers=None, json=None, timeout=None):
+        bodies.append(str(json))
+        return _Resp(
+            '{"domain":"finance","action":"note","summary":"[PERSON_1] paid [AMOUNT_1].",'
+            '"claims_to_verify":["[PERSON_1] holds [IBAN_1]"]}'
+        )
+
+    monkeypatch.setattr(httpx, "post", capture)
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr(
+        "verivann.adapters.vision.ocr_image",
+        lambda p: "Kontoauszug: Herr Anton Said, IBAN AT61 1904 3002 3457 3201, 1.234,56",
+    )
+    shot = tmp_path / "shot.png"
+    shot.write_bytes(b"\x89PNG")
+    config = Config(
+        staging_dir=tmp_path,
+        llm=LLMConfig(provider="openai", model="m", base_url="https://api.openai.com/v1"),
+    )
+
+    run("file", ref=str(shot), config=config)
+
+    assert bodies, "no model call was made - the test would prove nothing"
+    for i, body in enumerate(bodies):
+        assert "Anton Said" not in body, f"the name left in request {i + 1} of {len(bodies)}"
+        assert "AT61" not in body, f"the IBAN left in request {i + 1} of {len(bodies)}"
+
+
+def test_the_later_model_calls_get_the_redacted_copy_not_the_original(monkeypatch, tmp_path):
+    """Pins the two side doors directly, independent of whether the fixture fires them.
+
+    `match_questions` used to receive `extracted` (the original still holds plaintext in
+    the redacted mode) and `check_contradictions` used to receive the claims AFTER
+    `redaction.restore()` had put the truth back. Both are model calls like any other.
+    """
+    monkeypatch.setenv("VERIVANN_REDACT", "1")
+    seen: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        httpx, "post",
+        lambda *a, **k: _Resp(
+            '{"domain":"finance","action":"note","summary":"[PERSON_1] ok",'
+            '"claims_to_verify":["[PERSON_1] holds [IBAN_1]"]}'
+        ),
+    )
+    monkeypatch.setattr(
+        "verivann.questions.match",
+        lambda extracted, note_id, config: seen.setdefault("questions_text", extracted.text) and [],
+    )
+    monkeypatch.setattr(
+        "verivann.claims.check_contradictions",
+        lambda claims, config, staging_dir, exclude_note="": seen.setdefault("claims", list(claims))
+        and [],
+    )
+    monkeypatch.setattr("verivann.adapters.vision.ocr_available", lambda: True)
+    monkeypatch.setattr(
+        "verivann.adapters.vision.ocr_image",
+        lambda p: "Kontoauszug: Herr Anton Said, IBAN AT61 1904 3002 3457 3201, 1.234,56",
+    )
+    shot = tmp_path / "shot.png"
+    shot.write_bytes(b"\x89PNG")
+    config = Config(
+        staging_dir=tmp_path,
+        llm=LLMConfig(provider="openai", model="m", base_url="https://api.openai.com/v1"),
+    )
+
+    run("file", ref=str(shot), config=config)
+
+    if "questions_text" in seen:
+        assert "Anton Said" not in str(seen["questions_text"])
+        assert "AT61" not in str(seen["questions_text"])
+    if "claims" in seen:
+        joined = " ".join(str(c) for c in seen["claims"])
+        assert "Anton Said" not in joined
+        assert "AT61" not in joined
+
+
 def test_without_redaction_a_sensitive_file_is_simply_not_uploaded(monkeypatch, tmp_path):
     def explode(*a, **k):
         raise AssertionError("sensitive material reached a hosted model")

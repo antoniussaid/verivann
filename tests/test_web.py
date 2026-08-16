@@ -39,10 +39,28 @@ def test_a_website_cannot_reach_the_api_without_the_token():
 
 
 def test_a_browser_extension_origin_is_trusted_without_a_token():
-    """A web page cannot forge a chrome-extension:// origin - the browser sets it."""
+    """A web page cannot forge a chrome-extension:// origin - the browser sets it.
+
+    That premise only holds on loopback, which is why `exposed` defaults to False.
+    """
     assert is_authorized("chrome-extension://abcdefg", "", _TOKEN) is True
     assert is_authorized("moz-extension://abcdefg", "", _TOKEN) is True
     assert is_authorized("safari-web-extension://x", "", _TOKEN) is True
+
+
+def test_the_extension_exemption_does_not_survive_lan_exposure():
+    """Off the loopback an Origin is not a credential - it is a header curl can set.
+
+    `curl -H 'Origin: chrome-extension://x' http://<lan-ip>:8130/...` used to read the
+    whole library and could poison it through /intake, while the CLI advertised "always
+    requires a token". With --lan only the token counts; the extension already sends one
+    (extensions/*/shared.js sets x-verivann-token).
+    """
+    for origin in ("chrome-extension://abc", "moz-extension://x", "safari-web-extension://y"):
+        assert is_authorized(origin, "", _TOKEN, exposed=True) is False
+        assert is_authorized(origin, "wrong", _TOKEN, exposed=True) is False
+        # With the real token the extension keeps working over the LAN.
+        assert is_authorized(origin, _TOKEN, _TOKEN, exposed=True) is True
 
 
 def test_cors_never_reflects_a_website_origin():
