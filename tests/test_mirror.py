@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import httpx
 
 from verivann.bias import bias
@@ -21,7 +23,7 @@ class _Resp:
 
 def _indexed(note_id, title, text, staging, source_key="youtube:@guru", minutes=30.0):
     event = IntakeEvent(
-        id=note_id, created_at="2026-07-10T00:00:00Z",
+        id=note_id, created_at=datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         source=Source(kind="youtube", ref=f"https://youtube.com/watch?v={note_id}"),
         extracted=Extracted(title=title, text=text, meta={"duration": minutes * 60, "uploader": "Guru",
                                                           "extractor": "Youtube"}),
